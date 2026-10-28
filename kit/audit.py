@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import re
-from pathlib import Path
+from pathlib import Path, PureWindowsPath
 
 from . import mcpconfig
 from .model import FAIL, PASS, UNVERIFIED, ItemResult
@@ -23,7 +23,7 @@ def _strings(value: object) -> list[str]:
 
 
 def _command_name(command: object) -> str:
-    name = Path(str(command)).name.lower()
+    name = PureWindowsPath(str(command)).name.lower()
     for suffix in (".cmd", ".exe", ".bat"):
         if name.endswith(suffix):
             return name[: -len(suffix)]

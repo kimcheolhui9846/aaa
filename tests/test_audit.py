@@ -25,6 +25,10 @@ def test_windows_command_suffix_is_normalised():
     assert audit_config(_servers(command="C:\\node\\npx.cmd"), ALLOW) == []
 
 
+def test_posix_command_path_is_normalised():
+    assert audit_config(_servers(command="/usr/bin/npx"), ALLOW) == []
+
+
 @pytest.mark.parametrize(
     "data, fragment",
     [
