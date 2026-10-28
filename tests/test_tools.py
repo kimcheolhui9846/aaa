@@ -141,3 +141,25 @@ def test_dry_run_shows_install_and_runs_nothing(run_kit, workspace, probe, monke
     assert "INSTALL   tool:pytest" in out
     assert "Network:      would use:" in out and "pytest==8.4.2" in out
     assert list(workspace.iterdir()) == []
+
+
+def test_python_lib_is_found_in_the_user_site(tmp_path, monkeypatch):
+    user_site = tmp_path / "usersite"
+    (user_site / "fakepkg_xyz").mkdir(parents=True)
+    (user_site / "fakepkg_xyz" / "__init__.py").write_text("", encoding="utf-8")
+    assert not tools._importable("fakepkg_xyz")
+    monkeypatch.setattr(tools.site, "getusersitepackages", lambda: str(user_site))
+    assert tools._importable("fakepkg_xyz")
+
+
+def test_offline_run_never_reaches_the_install_path(run_kit, monkeypatch):
+    monkeypatch.setattr(preflight, "probe_tool", lambda name, timeout=15.0: ToolInfo(name))
+
+    def boom(*args, **kwargs):
+        raise AssertionError("offline must not run commands")
+
+    monkeypatch.setattr(tools, "run_command", boom)
+    code, out = run_kit("--profile", "python", "--offline", "--verbose")
+    assert code in (0, 1), out
+    assert "SKIPPED" in out and "offline" in out
+    assert "Network:      not used (--offline)" in out
