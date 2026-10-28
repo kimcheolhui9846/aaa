@@ -8,7 +8,13 @@ from pathlib import Path
 from .fsops import safe_path
 
 _PATTERNS = [
-    (re.compile(r"(?i)\b(api[_-]?key|token|secret|password)\s*[=:]\s*\S+"), r"\1=***"),
+    (
+        re.compile(
+            r"(?i)\b([\w-]*?(?:api[_-]?key|token|secret|password))\s*[=:]\s*(?:bearer\s+)?\S+"
+        ),
+        r"\1=***",
+    ),
+    (re.compile(r"(?i)\bbearer\s+\S+"), "Bearer ***"),
     (re.compile(r"\bsk-[A-Za-z0-9_-]{16,}"), "***"),
     (re.compile(r"\bgh[pousr]_[A-Za-z0-9]{20,}"), "***"),
 ]

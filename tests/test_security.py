@@ -56,3 +56,14 @@ def test_no_writes_outside_target(run_kit, workspace, tmp_path):
     sibling.mkdir()
     run_kit()
     assert list(sibling.iterdir()) == []
+
+
+def test_mask_hides_prefixed_names_and_bearer_values():
+    text = (
+        "GITHUB_TOKEN=abc123 OPENAI_API_KEY=xyz MY_SECRET=s3 "
+        "token: Bearer qq Authorization: Bearer zz"
+    )
+    masked = mask(text)
+    for secret in ("abc123", "xyz", "s3", "qq", "zz"):
+        assert secret not in masked
+    assert "GITHUB_TOKEN=***" in masked and "OPENAI_API_KEY=***" in masked
