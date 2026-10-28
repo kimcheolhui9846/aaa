@@ -84,3 +84,39 @@ def test_agents_md_policy(kit_root):
         assert heading in text
     assert "task-router" in text
     assert "hackathon-kit:begin" not in text
+
+
+ALL = CORE + ["implementation-review", "benchmark"]
+EXPLICIT_ONLY = ["implementation-review", "benchmark"]
+
+
+@pytest.mark.parametrize("name", ALL)
+def test_every_skill_is_valid(kit_root, name):
+    assert validate_skill(kit_root / ".agents" / "skills" / name) == []
+
+
+def test_skill_set_matches_folders(kit_root):
+    folders = sorted(p.name for p in (kit_root / ".agents" / "skills").iterdir() if p.is_dir())
+    assert folders == sorted(ALL)
+
+
+def test_total_description_budget(kit_root):
+    total = 0
+    for name in ALL:
+        text = (kit_root / ".agents" / "skills" / name / "SKILL.md").read_text(encoding="utf-8")
+        total += len(parse_frontmatter(text)["description"])
+    assert total <= 2000, total
+
+
+@pytest.mark.parametrize("name", EXPLICIT_ONLY)
+def test_explicit_only_policy(kit_root, name):
+    yaml_text = (kit_root / ".agents" / "skills" / name / "agents" / "openai.yaml").read_text(
+        encoding="utf-8"
+    )
+    assert "allow_implicit_invocation: false" in yaml_text
+    text = (kit_root / ".agents" / "skills" / name / "SKILL.md").read_text(encoding="utf-8")
+    assert parse_frontmatter(text)["description"].startswith("Use only when explicitly invoked")
+
+
+def test_benchmark_language_reference(kit_root):
+    assert (kit_root / ".agents/skills/benchmark/references/languages.md").is_file()
