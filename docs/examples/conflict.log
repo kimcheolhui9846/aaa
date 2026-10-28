@@ -1,0 +1,17 @@
+$ bootstrap 
+Environment:  Windows 11 AMD64, shell=windows, python 3.12.10
+Tools:        git OK, uv OK, node OK, npx OK, codex OK, python OK
+Target:       <target>
+Profile:      core
+AGENTS.md:    INSTALLED
+Skills:       6 expected / 5 verified
+Codex load:   UNVERIFIED (open Codex and run /skills)
+MCP:          none in profile 'core'
+Network:      not used
+Items:
+  CONFLICT   optional skill:benchmark  (.agents/skills/benchmark/SKILL.md: differs from the kit copy and was not written by the kit)
+Status:       PARTIAL
+Next action:
+  - Resolve conflict in skill:benchmark: .agents/skills/benchmark/SKILL.md: differs from the kit copy and was not written by the kit. Compare with the kit copy, then re-run.
+  - Open Codex in <target> and run /skills to confirm the kit skills load.
+(exit 1)

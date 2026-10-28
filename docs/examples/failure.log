@@ -1,0 +1,16 @@
+$ bootstrap 
+Environment:  Windows 11 AMD64, shell=windows, python 3.12.10
+Tools:        git OK, uv OK, node OK, npx OK, codex OK, python OK
+Target:       <target>
+Profile:      core
+AGENTS.md:    CONFLICT
+Skills:       6 expected / 6 verified
+Codex load:   UNVERIFIED (open Codex and run /skills)
+MCP:          none in profile 'core'
+Network:      not used
+Items:
+  CONFLICT   required AGENTS.md  (AGENTS.md: expected exactly one begin and one end marker)
+Status:       BLOCKED
+Next action:
+  - Resolve conflict in AGENTS.md: AGENTS.md: expected exactly one begin and one end marker. Compare with the kit copy, then re-run.
+(exit 2)
