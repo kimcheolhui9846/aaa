@@ -27,7 +27,7 @@
 - `<서버>: remote endpoint '...'`
 - `<서버>: secret-like env '...'`
 
-해당 서버 설정을 `config.toml`에서 지우거나 고친다. 키트가 쓴 구간이 아니면 키트는 건드리지 않았다. 설정이 유효한 TOML이 아니면 `cannot audit: config is not valid TOML (...)`로 `UNVERIFIED`가 된다.
+해당 서버 설정을 `config.toml`에서 지우거나 고친다. 키트가 쓴 구간이 아니면 키트는 건드리지 않았다. 설정이 유효한 TOML이 아니면 줄 단위 검사를 한다. 위험 항목이 보이면 `FAIL`(BLOCKED), 없으면 `cannot audit: config is not valid TOML (...)`로 `UNVERIFIED`가 된다.
 
 ## 도구 설치
 
