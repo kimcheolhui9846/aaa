@@ -1,11 +1,13 @@
 from __future__ import annotations
 
 import hashlib
+import io
 from pathlib import Path
 
 import pytest
 
 from kit import preflight
+from kit.app import run
 from kit.preflight import ToolInfo
 
 KIT_ROOT = Path(__file__).resolve().parent.parent
@@ -53,3 +55,13 @@ def fast_preflight(request, monkeypatch):
         "probe_tool",
         lambda name, timeout=15.0: ToolInfo(name, f"/fake/{name}", "fake 1.0"),
     )
+
+
+@pytest.fixture
+def run_kit(workspace):
+    def _run(*argv: str, cwd: Path | None = None) -> tuple[int, str]:
+        out = io.StringIO()
+        code = run(list(argv), cwd=cwd or workspace, out=out)
+        return code, out.getvalue()
+
+    return _run
