@@ -171,3 +171,11 @@ def test_fallback_rejects_verify_only_and_writes_nothing(kind, workspace):
     assert proc.returncode == 64, proc.stdout + proc.stderr
     assert "--verify-only requires Python 3.9+" in proc.stderr
     assert list(workspace.iterdir()) == []
+
+
+@pytest.mark.parametrize("kind", SHELLS)
+def test_fallback_unreadable_agents_md_is_conflict(kind, workspace):
+    (workspace / "AGENTS.md").mkdir()
+    proc = _run(kind, cwd=workspace, python=NO_PYTHON)
+    assert proc.returncode == 2, proc.stdout + proc.stderr
+    assert "CONFLICT" in proc.stdout and "Status:       BLOCKED" in proc.stdout

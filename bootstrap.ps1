@@ -125,8 +125,9 @@ Write-Output 'Python 3.9+ not found: shell-only mode (copies AGENTS.md and skill
 
 $AgentsPath = Join-Path $Target 'AGENTS.md'
 if (Test-Path -LiteralPath $AgentsPath) {
-    $existing = [System.IO.File]::ReadAllText($AgentsPath)
-    if ($existing.Contains($BeginMark)) {
+    $existing = $null
+    try { $existing = [System.IO.File]::ReadAllText($AgentsPath) } catch { $existing = $null }
+    if ($null -ne $existing -and $existing.Contains($BeginMark)) {
         Write-Note 'SKIP' 'AGENTS.md (kit block present)'
     } else {
         Write-Note 'CONFLICT' 'AGENTS.md (exists; merging needs Python - add the kit block by hand)'
