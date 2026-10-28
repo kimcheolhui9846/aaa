@@ -12,6 +12,7 @@ from .model import (
     EXIT_READY,
     FAIL,
     PASS,
+    UNVERIFIED,
     ItemResult,
 )
 from .preflight import EnvReport
@@ -29,7 +30,7 @@ def overall_status(items: list[ItemResult], shell_fallback: bool = False) -> tup
 
 def next_actions(items: list[ItemResult], target: Path, status: str) -> list[str]:
     actions = []
-    for i in items:
+    for i in sorted(items, key=lambda i: not i.required):
         if i.verified == CONFLICT:
             actions.append(
                 f"Resolve conflict in {i.name}: {i.detail}. Compare with the kit copy, then re-run."
@@ -38,6 +39,10 @@ def next_actions(items: list[ItemResult], target: Path, status: str) -> list[str
             actions.append(f"Fix {i.name}: {i.detail}. Then re-run.")
     if status != "BLOCKED":
         actions.append(f"Open Codex in {target} and run /skills to confirm the kit skills load.")
+        if any(i.name.startswith("codex-mcp:") and i.verified == UNVERIFIED for i in items):
+            actions.append(
+                f"Trust {target} in Codex, then run /mcp to confirm the MCP server loads."
+            )
     return actions[:3]
 
 
@@ -59,7 +64,13 @@ def render(
     tools = ", ".join(
         f"{name} {'OK' if info.ok else 'missing'}" for name, info in env.tools.items()
     )
-    mcp = "disabled (--no-mcp)" if opts.no_mcp else f"none in profile '{opts.profile}'"
+    mcp_items = [i for i in items if i.name.startswith("mcp:")]
+    if opts.no_mcp:
+        mcp = "disabled (--no-mcp)"
+    elif mcp_items:
+        mcp = ", ".join(f"{i.name[4:]} {i.verified}" for i in mcp_items)
+    else:
+        mcp = f"none in profile '{opts.profile}'"
     if network is None:
         network = "not used (--offline)" if opts.offline else "not used"
 

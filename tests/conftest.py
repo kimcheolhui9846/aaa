@@ -6,8 +6,9 @@ from pathlib import Path
 
 import pytest
 
-from kit import preflight, tools
+from kit import mcpcheck, preflight, tools
 from kit.app import run
+from kit.model import PASS
 from kit.preflight import ToolInfo
 
 KIT_ROOT = Path(__file__).resolve().parent.parent
@@ -65,6 +66,18 @@ def no_real_commands(monkeypatch):
         "run_command",
         lambda cmd, timeout=600.0, cwd=None: (1, "real commands are disabled in tests"),
     )
+
+
+@pytest.fixture(autouse=True)
+def fake_mcp(request, monkeypatch):
+    """Never start npx or codex in tests unless marked real_mcp."""
+    if request.node.get_closest_marker("real_mcp"):
+        return
+    monkeypatch.setattr(mcpcheck, "find_command", lambda name: f"/fake/{name}")
+    monkeypatch.setattr(
+        mcpcheck, "handshake", lambda command, timeout=120.0: (PASS, "1 tool(s): fake")
+    )
+    monkeypatch.setattr(mcpcheck, "codex_lists", lambda codex_path, target, name, runner=None: None)
 
 
 @pytest.fixture

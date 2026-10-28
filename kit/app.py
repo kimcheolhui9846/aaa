@@ -6,7 +6,7 @@ import sys
 from pathlib import Path
 from typing import TextIO
 
-from . import audit, mcpconfig, tools, webcheck
+from . import audit, mcpcheck, mcpconfig, tools, webcheck
 from .cli import Options, parse_args
 from .fsops import PathEscapeError, State, timestamp
 from .logs import write_log
@@ -77,8 +77,14 @@ def run(
     items.extend(tool_items)
     if any(spec["kind"] == "node-project" for spec in profile.tools):
         items.append(webcheck.check_node_project(opts.target, env.tools.get("node")))
+    if profile.mcp:
+        items.extend(
+            mcpcheck.check_servers(
+                kit_root, profile.mcp, env, opts.target, opts.offline, opts.no_mcp
+            )
+        )
     status, code = overall_status(items)
-    network = _network_line(opts, actions)
+    network = _network_line(opts, actions, profile)
     lines.append(
         render(env, opts, items, status, next_actions(items, opts.target, status), network)
     )
@@ -102,10 +108,12 @@ def main(argv: list[str]) -> int:
         return EXIT_BLOCKED
 
 
-def _network_line(opts: Options, actions) -> str:
+def _network_line(opts: Options, actions, profile) -> str:
     if opts.offline:
         return "not used (--offline)"
     used = tools.network_used(actions)
+    if profile.mcp and not opts.no_mcp:
+        used.append("npx (MCP handshake)")
     return "used: " + "; ".join(used) if used else "not used"
 
 
@@ -113,6 +121,8 @@ def _dry_run_text(
     opts: Options, env: EnvReport, changes: list[FileChange], actions, profile
 ) -> str:
     planned = tools.network_used(actions)
+    if profile.mcp and not opts.no_mcp:
+        planned.append("npx (MCP handshake)")
     if opts.offline:
         network = "none (--offline)"
     elif planned:
@@ -131,5 +141,14 @@ def _dry_run_text(
     ]
     if actions:
         lines += ["Planned tools:", tools.format_tool_plan(actions)]
+    if profile.mcp:
+        reason = "--no-mcp" if opts.no_mcp else ("--offline" if opts.offline else None)
+        lines.append("Planned MCP checks:")
+        for name in profile.mcp:
+            lines.append(
+                f"  SKIPPED   mcp:{name}  ({reason})"
+                if reason
+                else f"  HANDSHAKE mcp:{name}  (npx -y <pinned package>) [network]"
+            )
     lines += ["DRY RUN: nothing was written.", ""]
     return "\n".join(lines)
