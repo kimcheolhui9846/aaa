@@ -119,6 +119,7 @@ elif [ "$DRY_RUN" -eq 1 ]; then
   note CREATE AGENTS.md
 else
   tmp="$TARGET/AGENTS.md.kit-tmp"
+  rm -rf "$tmp"
   if ! { { printf '%s\n' "$BEGIN_MARK"; cat "$KIT_ROOT/AGENTS.md"; printf '%s\n' "$END_MARK"; } \
     > "$tmp" && mv "$tmp" "$TARGET/AGENTS.md"; }; then
     rm -f "$tmp"
@@ -135,6 +136,7 @@ for src in "$KIT_ROOT"/.agents/skills/*/; do
   elif [ "$DRY_RUN" -eq 1 ]; then
     note CREATE ".agents/skills/$name"
   else
+    rm -rf "$dest.kit-tmp"
     if ! { mkdir -p "$TARGET/.agents/skills" && cp -R "${src%/}" "$dest.kit-tmp" \
       && mv "$dest.kit-tmp" "$dest"; }; then
       rm -rf "$dest.kit-tmp"

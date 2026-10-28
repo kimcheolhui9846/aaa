@@ -137,6 +137,7 @@ if (Test-Path -LiteralPath $AgentsPath) {
     Write-Note 'CREATE' 'AGENTS.md'
 } else {
     $tmp = "$AgentsPath.kit-tmp"
+    Remove-Item -LiteralPath $tmp -Recurse -Force -ErrorAction SilentlyContinue
     try {
         $body = [System.IO.File]::ReadAllText((Join-Path $KitRoot 'AGENTS.md')).Replace("`r`n", "`n").Trim()
         [System.IO.File]::WriteAllText($tmp, "$BeginMark`n$body`n$EndMark`n", $Utf8NoBom)
@@ -159,6 +160,7 @@ foreach ($dir in Get-ChildItem -LiteralPath $SkillsSrc -Directory) {
         Write-Note 'CREATE' $rel
     } else {
         $tmpDir = "$dest.kit-tmp"
+        Remove-Item -LiteralPath $tmpDir -Recurse -Force -ErrorAction SilentlyContinue
         try {
             New-Item -ItemType Directory -Force -Path $SkillsDst -ErrorAction Stop | Out-Null
             Copy-Item -LiteralPath $dir.FullName -Destination $tmpDir -Recurse -ErrorAction Stop

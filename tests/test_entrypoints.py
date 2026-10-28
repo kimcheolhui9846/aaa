@@ -179,3 +179,16 @@ def test_fallback_unreadable_agents_md_is_conflict(kind, workspace):
     proc = _run(kind, cwd=workspace, python=NO_PYTHON)
     assert proc.returncode == 2, proc.stdout + proc.stderr
     assert "CONFLICT" in proc.stdout and "Status:       BLOCKED" in proc.stdout
+
+
+@pytest.mark.parametrize("kind", SHELLS)
+def test_fallback_clears_stale_tmp_copies(kind, workspace):
+    stale = workspace / ".agents" / "skills" / "task-router.kit-tmp"
+    stale.mkdir(parents=True)
+    (stale / "old.txt").write_text("x", encoding="utf-8")
+    (workspace / "AGENTS.md.kit-tmp").write_text("old", encoding="utf-8")
+    proc = _run(kind, cwd=workspace, python=NO_PYTHON)
+    assert proc.returncode == 1, proc.stdout + proc.stderr
+    assert not [p for p in workspace.rglob("*") if ".kit-tmp" in p.name]
+    assert not (workspace / ".agents" / "skills" / "task-router" / "task-router").exists()
+    assert (workspace / ".agents" / "skills" / "task-router" / "SKILL.md").is_file()
