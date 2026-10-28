@@ -6,7 +6,7 @@ import sys
 from pathlib import Path
 from typing import TextIO
 
-from . import mcpconfig
+from . import audit, mcpconfig
 from .cli import Options, parse_args
 from .fsops import PathEscapeError, State, timestamp
 from .logs import write_log
@@ -71,6 +71,7 @@ def run(
         writable=env.target_writable,
         include_mcp=include_mcp,
     )
+    items.append(audit.audit_target(opts.target, kit_root))
     status, code = overall_status(items)
     lines.append(render(env, opts, items, status, next_actions(items, opts.target, status)))
     text = "\n".join(lines)

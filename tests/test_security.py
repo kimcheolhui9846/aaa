@@ -7,9 +7,17 @@ FORBIDDEN = [
     re.compile(r"curl[^\n|]*\|\s*(ba)?sh"),
     re.compile(r"\|\s*iex\b", re.IGNORECASE),
     re.compile(r"Invoke-Expression", re.IGNORECASE),
+    re.compile(r"https?://[^\s\"']*(telemetry|analytics|sentry|segment)", re.IGNORECASE),
 ]
 NETWORK_IMPORT = re.compile(r"^\s*(import|from)\s+(socket|urllib|http)\b", re.MULTILINE)
-CODE_GLOBS = ["kit/*.py", "run_kit.py", "bootstrap.sh", "bootstrap.ps1"]
+CODE_GLOBS = [
+    "kit/*.py",
+    "run_kit.py",
+    "bootstrap.sh",
+    "bootstrap.ps1",
+    "mcp/*.json",
+    "profiles/*.json",
+]
 
 
 def test_mask_hides_tokens():
@@ -49,6 +57,11 @@ def test_kit_code_has_no_push_or_pipe_to_shell(kit_root):
 def test_kit_core_imports_no_network_modules(kit_root):
     for path in kit_root.glob("kit/*.py"):
         assert not NETWORK_IMPORT.search(path.read_text(encoding="utf-8")), path.name
+
+
+def test_kit_mcp_data_contains_no_remote_endpoints(kit_root):
+    for path in kit_root.glob("mcp/*.json"):
+        assert not re.search(r"https?://", path.read_text(encoding="utf-8")), path.name
 
 
 def test_no_writes_outside_target(run_kit, workspace, tmp_path):

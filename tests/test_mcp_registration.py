@@ -35,7 +35,7 @@ def test_existing_settings_are_preserved_byte_for_byte(run_kit, workspace):
 
 
 def test_same_name_outside_block_is_conflict(run_kit, workspace):
-    original = '[mcp_servers.sequential-thinking]\ncommand = "node"\n'
+    original = '[mcp_servers.sequential-thinking]\ncommand = "npx"\n'
     _write(workspace, original)
     code, out = run_kit("--profile", "python")
     assert _config(workspace).read_text(encoding="utf-8") == original
