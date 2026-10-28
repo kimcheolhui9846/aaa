@@ -67,7 +67,7 @@ def test_remote_server_fails(kit_root, workspace):
 
 
 def test_without_tomllib_is_unverified(kit_root, workspace, monkeypatch):
-    _write(workspace, '[mcp_servers.remote]\nurl = "https://example.invalid/mcp"\n')
+    _write(workspace, 'model = "x"\n')
     monkeypatch.setattr(mcpconfig, "parse_toml", lambda text: (None, None, ""))
     assert audit_target(workspace, kit_root).verified == UNVERIFIED
 
@@ -86,3 +86,63 @@ def test_same_name_outside_block_with_disallowed_command_blocks(run_kit, workspa
     _write(workspace, '[mcp_servers.sequential-thinking]\ncommand = "node"\n')
     code, out = run_kit("--profile", "python")
     assert code == 2 and "security audit" in out
+
+
+REMOTE = '[mcp_servers.remote]\nurl = "https://example.invalid/mcp"\n'
+
+
+def _no_tomllib(monkeypatch):
+    monkeypatch.setattr(mcpconfig, "parse_toml", lambda text: (None, None, ""))
+
+
+def test_line_scan_fails_remote_without_tomllib(kit_root, workspace, monkeypatch):
+    _write(workspace, REMOTE)
+    _no_tomllib(monkeypatch)
+    item = audit_target(workspace, kit_root)
+    assert item.verified == FAIL and item.required is True
+    assert "remote: not in mcp/allowlist.json" in item.detail
+    assert "line scan" in item.detail
+
+
+def test_line_scan_remote_blocks_the_run(run_kit, workspace, monkeypatch):
+    _write(workspace, REMOTE)
+    _no_tomllib(monkeypatch)
+    code, out = run_kit()
+    assert code == 2 and "security audit" in out and "Status:       BLOCKED" in out
+
+
+def test_line_scan_finds_secret_env_and_endpoint(kit_root, workspace, monkeypatch):
+    _write(
+        workspace,
+        '[mcp_servers.sequential-thinking]\ncommand = "npx"\nargs = ["https://x.invalid"]\n'
+        '[mcp_servers.sequential-thinking.env]\nOPENAI_API_KEY = "x"\n',
+    )
+    _no_tomllib(monkeypatch)
+    item = audit_target(workspace, kit_root)
+    assert item.verified == FAIL
+    assert "remote endpoint in mcp_servers" in item.detail
+    assert "secret-like env 'OPENAI_API_KEY'" in item.detail
+
+
+def test_clean_config_without_tomllib_is_unverified_and_shown(run_kit, workspace, monkeypatch):
+    _write(workspace, '# nothing here\nmodel = "x"\n')
+    _no_tomllib(monkeypatch)
+    code, out = run_kit()
+    assert code == 0
+    assert "UNVERIFIED required security audit" in out
+    assert "Check security audit by hand: config audit needs Python 3.11+ (tomllib)." in out
+
+
+def test_invalid_toml_with_remote_server_fails(kit_root, workspace):
+    _write(workspace, REMOTE + "broken = = =\n")
+    item = audit_target(workspace, kit_root)
+    if mcpconfig.parse_toml("")[0] is None:
+        pytest.skip("tomllib needs Python 3.11+")
+    assert item.verified == FAIL and "line scan" in item.detail
+
+
+def test_invalid_toml_without_findings_stays_unverified(kit_root, workspace):
+    if mcpconfig.parse_toml("")[0] is None:
+        pytest.skip("tomllib needs Python 3.11+")
+    _write(workspace, "broken = = =\n")
+    assert audit_target(workspace, kit_root).verified == UNVERIFIED

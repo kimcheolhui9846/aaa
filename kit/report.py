@@ -37,6 +37,9 @@ def next_actions(items: list[ItemResult], target: Path, status: str) -> list[str
             )
         elif i.verified == FAIL:
             actions.append(f"Fix {i.name}: {i.detail}. Then re-run.")
+    for i in items:
+        if i.required and i.verified == UNVERIFIED:
+            actions.append(f"Check {i.name} by hand: {i.detail}.")
     if status != "BLOCKED":
         actions.append(f"Open Codex in {target} and run /skills to confirm the kit skills load.")
         if any(i.name.startswith("codex-mcp:") and i.verified == UNVERIFIED for i in items):
@@ -44,6 +47,10 @@ def next_actions(items: list[ItemResult], target: Path, status: str) -> list[str
                 f"Trust {target} in Codex, then run /mcp to confirm the MCP server loads."
             )
     return actions[:3]
+
+
+def _shown(item: ItemResult) -> bool:
+    return item.verified in BAD or (item.required and item.verified == UNVERIFIED)
 
 
 def render(
@@ -85,7 +92,7 @@ def render(
         f"MCP:          {mcp}",
         f"Network:      {network}",
     ]
-    shown = items if opts.verbose else [i for i in items if i.verified in BAD]
+    shown = items if opts.verbose else [i for i in items if _shown(i)]
     if shown:
         lines.append("Items:")
         for i in shown:
