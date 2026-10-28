@@ -1,4 +1,5 @@
 import os
+from pathlib import Path
 
 import pytest
 
@@ -44,6 +45,23 @@ def test_apply_cleans_temp_file_and_saves_state_on_failure(workspace, monkeypatc
 
     monkeypatch.setattr(os, "replace", boom)
     change = FileChange("a.txt", "o", Outcome.CREATE, b"x", sha256(b"x"))
+    with pytest.raises(OSError, match="disk full"):
+        apply_changes(workspace, [change], State(), "s1", "core")
+    assert not list(workspace.rglob("*.kit-tmp"))
+    assert (workspace / ".kit" / "state.json").is_file()
+
+
+def test_apply_cleans_temp_file_when_write_fails(workspace, monkeypatch):
+    real_write_bytes = Path.write_bytes
+
+    def flaky_write_bytes(self, data):
+        if self.name.endswith(".kit-tmp"):
+            real_write_bytes(self, b"par")
+            raise OSError("disk full")
+        return real_write_bytes(self, data)
+
+    monkeypatch.setattr(Path, "write_bytes", flaky_write_bytes)
+    change = FileChange("a.txt", "o", Outcome.CREATE, b"xyz", sha256(b"xyz"))
     with pytest.raises(OSError, match="disk full"):
         apply_changes(workspace, [change], State(), "s1", "core")
     assert not list(workspace.rglob("*.kit-tmp"))

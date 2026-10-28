@@ -32,8 +32,8 @@ def apply_changes(
 def _write_atomic(path: Path, data: bytes) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     tmp = path.with_name(path.name + ".kit-tmp")
-    tmp.write_bytes(data)
     try:
+        tmp.write_bytes(data)
         os.replace(tmp, path)
     except OSError:
         tmp.unlink(missing_ok=True)
