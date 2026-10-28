@@ -6,7 +6,7 @@ import sys
 from pathlib import Path
 from typing import TextIO
 
-from . import audit, mcpconfig
+from . import audit, mcpconfig, tools
 from .cli import Options, parse_args
 from .fsops import PathEscapeError, State, timestamp
 from .logs import write_log
@@ -49,9 +49,10 @@ def run(
     state = State.load(opts.target)
     include_mcp = bool(profile.mcp) and not opts.no_mcp
     changes = plan_changes(opts.target, kit_root, profile, state, include_mcp)
+    actions = tools.plan_tools(profile, env, opts.offline, opts.verify_only)
 
     if opts.dry_run:
-        out.write(_dry_run_text(opts, env, changes))
+        out.write(_dry_run_text(opts, env, changes, actions, profile))
         return EXIT_READY
 
     stamp = timestamp()
@@ -61,6 +62,7 @@ def run(
             apply_changes(opts.target, changes, state, stamp, opts.profile)
         except (OSError, PathEscapeError) as exc:
             lines.append(f"error: write failed: {exc}")
+    tool_items = tools.run_tools(actions)
 
     items = verify_target(
         opts.target,
@@ -72,8 +74,12 @@ def run(
         include_mcp=include_mcp,
     )
     items.append(audit.audit_target(opts.target, kit_root))
+    items.extend(tool_items)
     status, code = overall_status(items)
-    lines.append(render(env, opts, items, status, next_actions(items, opts.target, status)))
+    network = _network_line(opts, actions)
+    lines.append(
+        render(env, opts, items, status, next_actions(items, opts.target, status), network)
+    )
     text = "\n".join(lines)
     out.write(text)
     if env.target_writable:
@@ -94,16 +100,34 @@ def main(argv: list[str]) -> int:
         return EXIT_BLOCKED
 
 
-def _dry_run_text(opts: Options, env: EnvReport, changes: list[FileChange]) -> str:
-    return "\n".join(
-        [
-            f"Environment:  {env.os} {env.arch}, shell={env.shell}, python {env.python}",
-            f"Target:       {opts.target}",
-            f"Profile:      {opts.profile}",
-            "Network:      none (this profile installs no tools)",
-            "Planned changes:",
-            format_plan(changes, opts.verbose),
-            "DRY RUN: nothing was written.",
-            "",
-        ]
-    )
+def _network_line(opts: Options, actions) -> str:
+    if opts.offline:
+        return "not used (--offline)"
+    used = tools.network_used(actions)
+    return "used: " + "; ".join(used) if used else "not used"
+
+
+def _dry_run_text(
+    opts: Options, env: EnvReport, changes: list[FileChange], actions, profile
+) -> str:
+    planned = tools.network_used(actions)
+    if opts.offline:
+        network = "none (--offline)"
+    elif planned:
+        network = "would use: " + "; ".join(planned)
+    elif not profile.tools and not profile.mcp:
+        network = "none (this profile installs no tools)"
+    else:
+        network = "none"
+    lines = [
+        f"Environment:  {env.os} {env.arch}, shell={env.shell}, python {env.python}",
+        f"Target:       {opts.target}",
+        f"Profile:      {opts.profile}",
+        f"Network:      {network}",
+        "Planned changes:",
+        format_plan(changes, opts.verbose),
+    ]
+    if actions:
+        lines += ["Planned tools:", tools.format_tool_plan(actions)]
+    lines += ["DRY RUN: nothing was written.", ""]
+    return "\n".join(lines)

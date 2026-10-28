@@ -42,7 +42,12 @@ def next_actions(items: list[ItemResult], target: Path, status: str) -> list[str
 
 
 def render(
-    env: EnvReport, opts: Options, items: list[ItemResult], status: str, actions: list[str]
+    env: EnvReport,
+    opts: Options,
+    items: list[ItemResult],
+    status: str,
+    actions: list[str],
+    network: str | None = None,
 ) -> str:
     skills = [i for i in items if i.name.startswith("skill:")]
     verified = sum(1 for i in skills if i.verified == PASS)
@@ -55,7 +60,8 @@ def render(
         f"{name} {'OK' if info.ok else 'missing'}" for name, info in env.tools.items()
     )
     mcp = "disabled (--no-mcp)" if opts.no_mcp else f"none in profile '{opts.profile}'"
-    network = "not used (--offline)" if opts.offline else "not used"
+    if network is None:
+        network = "not used (--offline)" if opts.offline else "not used"
 
     lines = [
         f"Environment:  {env.os} {env.arch}, shell={env.shell}, python {env.python}",

@@ -6,7 +6,7 @@ from pathlib import Path
 
 import pytest
 
-from kit import preflight
+from kit import preflight, tools
 from kit.app import run
 from kit.preflight import ToolInfo
 
@@ -54,6 +54,16 @@ def fast_preflight(request, monkeypatch):
         preflight,
         "probe_tool",
         lambda name, timeout=15.0: ToolInfo(name, f"/fake/{name}", "fake 1.0"),
+    )
+
+
+@pytest.fixture(autouse=True)
+def no_real_commands(monkeypatch):
+    """Tool installs and codex calls never run for real in tests."""
+    monkeypatch.setattr(
+        tools,
+        "run_command",
+        lambda cmd, timeout=600.0, cwd=None: (1, "real commands are disabled in tests"),
     )
 
 
