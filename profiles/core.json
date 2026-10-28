@@ -1,0 +1,21 @@
+{
+  "name": "core",
+  "description": "AGENTS.md and the six kit skills. Installs no tools and no MCP servers.",
+  "extends": null,
+  "skills": [
+    "task-router",
+    "tdd-automator",
+    "algorithm-optimizer",
+    "submission-validator",
+    "implementation-review",
+    "benchmark"
+  ],
+  "required_skills": [
+    "task-router",
+    "tdd-automator",
+    "algorithm-optimizer",
+    "submission-validator"
+  ],
+  "tools": [],
+  "mcp": []
+}
