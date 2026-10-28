@@ -88,6 +88,16 @@ CONFLICT=0
 
 note() { printf '  %-9s %s\n' "$1" "$2"; }
 
+fail_blocked() {
+  echo "error: $1" >&2
+  echo "Target:       $TARGET"
+  echo "Mode:         shell-only (no Python 3.9+)"
+  echo "Status:       BLOCKED"
+  echo "Next action:"
+  echo "  - $2"
+  exit 2
+}
+
 echo "Python 3.9+ not found: shell-only mode (copies AGENTS.md and skills; installs nothing)."
 
 if [ -e "$TARGET/AGENTS.md" ]; then
@@ -100,8 +110,12 @@ if [ -e "$TARGET/AGENTS.md" ]; then
 elif [ "$DRY_RUN" -eq 1 ]; then
   note CREATE AGENTS.md
 else
-  { printf '%s\n' "$BEGIN_MARK"; cat "$KIT_ROOT/AGENTS.md"; printf '%s\n' "$END_MARK"; } \
-    > "$TARGET/AGENTS.md"
+  tmp="$TARGET/AGENTS.md.kit-tmp"
+  if ! { { printf '%s\n' "$BEGIN_MARK"; cat "$KIT_ROOT/AGENTS.md"; printf '%s\n' "$END_MARK"; } \
+    > "$tmp" && mv "$tmp" "$TARGET/AGENTS.md"; }; then
+    rm -f "$tmp"
+    fail_blocked "could not write AGENTS.md" "Check that $TARGET is writable, then re-run."
+  fi
   note CREATE AGENTS.md
 fi
 
@@ -113,9 +127,10 @@ for src in "$KIT_ROOT"/.agents/skills/*/; do
   elif [ "$DRY_RUN" -eq 1 ]; then
     note CREATE ".agents/skills/$name"
   else
-    if ! { mkdir -p "$TARGET/.agents/skills" && cp -R "${src%/}" "$dest"; }; then
-      echo "error: could not copy skill $name" >&2
-      exit 2
+    if ! { mkdir -p "$TARGET/.agents/skills" && cp -R "${src%/}" "$dest.kit-tmp" \
+      && mv "$dest.kit-tmp" "$dest"; }; then
+      rm -rf "$dest.kit-tmp"
+      fail_blocked "could not copy skill $name" "Check that $TARGET/.agents/skills is writable, then re-run."
     fi
     note CREATE ".agents/skills/$name"
   fi

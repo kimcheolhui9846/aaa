@@ -135,3 +135,13 @@ def test_fallback_output_upgrades_cleanly_with_python(kind, workspace):
     proc = _run(kind, cwd=workspace, python=_python(kind))
     assert proc.returncode == 0, proc.stdout + proc.stderr
     assert "Status:       READY" in proc.stdout
+
+
+@pytest.mark.parametrize("kind", SHELLS)
+def test_fallback_write_failure_is_blocked(kind, workspace):
+    (workspace / ".agents").write_bytes(b"not a directory\n")
+    proc = _run(kind, cwd=workspace, python=NO_PYTHON)
+    assert proc.returncode == 2, proc.stdout + proc.stderr
+    assert "Status:       BLOCKED" in proc.stdout
+    assert (workspace / ".agents").read_bytes() == b"not a directory\n"
+    assert not [p for p in workspace.rglob("*") if ".kit-tmp" in p.name]
