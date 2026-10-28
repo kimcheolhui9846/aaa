@@ -82,3 +82,21 @@ def test_malformed_markers(text):
 
 def test_extract_block_none_without_markers():
     assert extract_block("plain\n") is None
+
+
+def test_merge_unchanged_when_block_has_crlf():
+    existing = "intro\r\n" + render_block(BODY).replace("\n", "\r\n")
+    text, outcome, _ = merge(existing, BODY, None)
+    assert outcome == "unchanged" and text is None
+
+
+def test_merge_updates_crlf_block_written_by_kit():
+    old = "# Policy\n- old rule\n"
+    existing = render_block(old).replace("\n", "\r\n") + "tail\r\n"
+    text, outcome, _ = merge(existing, BODY, sha256(old.strip().encode("utf-8")))
+    assert outcome == "update"
+    assert text == render_block(BODY) + "tail\r\n"
+
+
+def test_extract_block_normalizes_crlf_interior():
+    assert extract_block(f"{BEGIN}\r\na\r\nb\r\n{END}\r\n")[2] == "a\nb"

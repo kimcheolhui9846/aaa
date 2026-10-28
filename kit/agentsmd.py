@@ -32,7 +32,7 @@ def extract_block(text: str) -> tuple[int, int, str] | None:
         stop += 2
     elif text.startswith("\n", stop):
         stop += 1
-    return start, stop, text[start + len(BEGIN) : end].strip()
+    return start, stop, text[start + len(BEGIN) : end].replace("\r\n", "\n").strip()
 
 
 def merge(
