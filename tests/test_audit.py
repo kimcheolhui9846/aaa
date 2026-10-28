@@ -146,3 +146,13 @@ def test_invalid_toml_without_findings_stays_unverified(kit_root, workspace):
         pytest.skip("tomllib needs Python 3.11+")
     _write(workspace, "broken = = =\n")
     assert audit_target(workspace, kit_root).verified == UNVERIFIED
+
+
+def test_line_scan_ignores_url_outside_mcp_servers(kit_root, workspace, monkeypatch):
+    kit = (
+        f'{mcpconfig.BEGIN}\n[mcp_servers.sequential-thinking]\ncommand = "npx"\n'
+        f'args = ["-y", "pkg@1"]\n{mcpconfig.END}\n'
+    )
+    _write(workspace, '[other]\nurl = "https://x"\n\n' + kit)
+    _no_tomllib(monkeypatch)
+    assert audit_target(workspace, kit_root).verified == UNVERIFIED

@@ -85,12 +85,12 @@ def scan_lines(text: str, allowlist: dict) -> list[str]:
             header = mcpconfig._HEADER.match(line)
             if header and header.group(1) not in allowlist["servers"]:
                 add(f"{header.group(1)}: not in mcp/allowlist.json")
+        if not in_mcp:
+            continue
         for key in keys:
             found = key.match(line)
             if found:
                 add(f"forbidden key '{found.group(1)}' (remote transport)")
-        if not in_mcp:
-            continue
         if _REMOTE.search(line):
             add("remote endpoint in mcp_servers")
         for word in _WORD.findall(line):
