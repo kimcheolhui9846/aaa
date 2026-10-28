@@ -77,7 +77,11 @@ def _verify_skill(
         return ItemResult(label, required, True, True, FAIL, "; ".join(errors))
     for rel, data in iter_skill_files(kit_root, name):
         path = target / rel
-        if not path.is_file() or path.read_bytes() != data:
+        try:
+            differs = not path.is_file() or path.read_bytes() != data
+        except OSError as exc:
+            return ItemResult(label, required, True, True, FAIL, f"cannot read {rel}: {exc}")
+        if differs:
             return ItemResult(
                 label, required, True, True, FAIL, f"files differ from the kit copy ({rel})"
             )

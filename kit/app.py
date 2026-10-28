@@ -7,9 +7,9 @@ from pathlib import Path
 from typing import TextIO
 
 from .cli import Options, parse_args
-from .fsops import State, timestamp
+from .fsops import PathEscapeError, State, timestamp
 from .logs import write_log
-from .model import EXIT_READY, EXIT_TARGET, EXIT_USAGE, TargetError, UsageError
+from .model import EXIT_BLOCKED, EXIT_READY, EXIT_TARGET, EXIT_USAGE, TargetError, UsageError
 from .plan import FileChange, format_plan, plan_changes
 from .preflight import EnvReport, run_preflight
 from .profiles import available_profiles, load_profile
@@ -56,7 +56,7 @@ def run(
     if not opts.verify_only and env.target_writable:
         try:
             apply_changes(opts.target, changes, state, stamp, opts.profile)
-        except OSError as exc:
+        except (OSError, PathEscapeError) as exc:
             lines.append(f"error: write failed: {exc}")
 
     items = verify_target(
@@ -74,9 +74,19 @@ def run(
     if env.target_writable:
         try:
             write_log(opts.target, text, stamp)
-        except OSError:
+        except (OSError, PathEscapeError):
             pass
     return code
+
+
+def main(argv: list[str]) -> int:
+    """Entry-point wrapper: any unexpected error is BLOCKED, never a bare traceback."""
+    try:
+        return run(argv)
+    except Exception as exc:
+        print("Status:       BLOCKED", file=sys.stderr)
+        print(f"error: unexpected {type(exc).__name__}: {exc}", file=sys.stderr)
+        return EXIT_BLOCKED
 
 
 def _dry_run_text(opts: Options, env: EnvReport, changes: list[FileChange]) -> str:

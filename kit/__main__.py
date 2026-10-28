@@ -1,6 +1,6 @@
 import sys
 
-from .app import run
+from .app import main
 
 if __name__ == "__main__":
-    sys.exit(run(sys.argv[1:]))
+    sys.exit(main(sys.argv[1:]))
