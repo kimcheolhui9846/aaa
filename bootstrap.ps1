@@ -95,7 +95,10 @@ while ($i -lt $args.Count) {
     } elseif ($a -eq '--dry-run') {
         $DryRun = $true
         $i += 1
-    } elseif (@('--offline', '--verify-only', '--no-mcp', '--verbose') -contains $a) {
+    } elseif ($a -eq '--verify-only') {
+        Write-Err 'error: --verify-only requires Python 3.9+ (shell-only mode cannot verify)'
+        exit 64
+    } elseif (@('--offline', '--no-mcp', '--verbose') -contains $a) {
         $i += 1
     } else {
         Write-Err "error: unknown argument: $a"

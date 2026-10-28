@@ -72,7 +72,10 @@ while [ $# -gt 0 ]; do
       TARGET="$2"
       shift 2 ;;
     --dry-run) DRY_RUN=1; shift ;;
-    --offline|--verify-only|--no-mcp|--verbose) shift ;;
+    --verify-only)
+      echo "error: --verify-only requires Python 3.9+ (shell-only mode cannot verify)" >&2
+      exit 64 ;;
+    --offline|--no-mcp|--verbose) shift ;;
     *)
       echo "error: unknown argument: $1" >&2
       echo "Run with --help for usage." >&2

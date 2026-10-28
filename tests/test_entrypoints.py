@@ -164,3 +164,10 @@ def test_empty_target_exits_64(kind, with_python, workspace):
     python = _python(kind) if with_python else NO_PYTHON
     assert _run(kind, "--target", "", cwd=workspace, python=python).returncode == 64
 
+
+@pytest.mark.parametrize("kind", SHELLS)
+def test_fallback_rejects_verify_only_and_writes_nothing(kind, workspace):
+    proc = _run(kind, "--verify-only", cwd=workspace, python=NO_PYTHON)
+    assert proc.returncode == 64, proc.stdout + proc.stderr
+    assert "--verify-only requires Python 3.9+" in proc.stderr
+    assert list(workspace.iterdir()) == []
