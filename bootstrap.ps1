@@ -121,7 +121,7 @@ if ($Target.TrimEnd($Seps) -ieq $KitFull.TrimEnd($Seps)) {
 $Utf8NoBom = New-Object System.Text.UTF8Encoding $false
 $Conflict = $false
 
-Write-Output 'Python 3.9+ not found: shell-only mode (copies AGENTS.md and skills; installs nothing).'
+Write-Output 'Python 3.9+ not found: shell-only mode (copies AGENTS.md and skills; installs no tools).'
 
 $AgentsPath = Join-Path $Target 'AGENTS.md'
 if (Test-Path -LiteralPath $AgentsPath) {
@@ -155,7 +155,7 @@ foreach ($dir in Get-ChildItem -LiteralPath $SkillsSrc -Directory) {
     $dest = Join-Path $SkillsDst $dir.Name
     $rel = ".agents/skills/$($dir.Name)"
     if (Test-Path -LiteralPath $dest) {
-        Write-Note 'SKIP' "$rel (exists)"
+        Write-Note 'SKIP' "$rel (exists, not checked)"
     } elseif ($DryRun) {
         Write-Note 'CREATE' $rel
     } else {

@@ -106,7 +106,7 @@ fail_blocked() {
   exit 2
 }
 
-echo "Python 3.9+ not found: shell-only mode (copies AGENTS.md and skills; installs nothing)."
+echo "Python 3.9+ not found: shell-only mode (copies AGENTS.md and skills; installs no tools)."
 
 if [ -e "$TARGET/AGENTS.md" ]; then
   if grep -qF -- "$BEGIN_MARK" "$TARGET/AGENTS.md"; then
@@ -132,7 +132,7 @@ for src in "$KIT_ROOT"/.agents/skills/*/; do
   name="$(basename "$src")"
   dest="$TARGET/.agents/skills/$name"
   if [ -e "$dest" ]; then
-    note SKIP ".agents/skills/$name (exists)"
+    note SKIP ".agents/skills/$name (exists, not checked)"
   elif [ "$DRY_RUN" -eq 1 ]; then
     note CREATE ".agents/skills/$name"
   else

@@ -13,7 +13,7 @@
 | Codex가 `.agents/skills`를 탐색 | UNVERIFIED | Codex에서 `/skills` | `AGENTS.md`만으로 진행 |
 | 설치한 파일이 세션 동안 유지 | UNVERIFIED | 재접속 후 파일 확인 | 다시 실행(멱등) |
 
-## 로컬에서 확인한 사실 (2026-10-28, codex-cli 0.164.0)
+## 로컬에서 확인한 사실 (2026-10-28, codex-cli 0.165.0)
 
 - Skill 탐색 경로: `$CWD/.agents/skills` ~ 저장소 루트의 `.agents/skills`, `$HOME/.agents/skills`.
 - `agents/openai.yaml`의 `policy.allow_implicit_invocation: false`로 명시 호출 전용 Skill을 만들 수 있다.
@@ -23,4 +23,5 @@
 ## 설계상 가정
 
 - 대상 작업 공간은 Codex를 실행할 디렉터리(또는 그 상위 저장소 루트)다.
+- 셸 전용 모드는 심볼릭 링크 차단이 없다. 작업 공간에 미리 심어 둔 `.agents` 심볼릭 링크는 범위 밖이다(Python 모드는 대상 밖 경로 쓰기를 거부한다).
 - 텍스트 파일은 UTF-8이다. UTF-8이 아닌 기존 `AGENTS.md`는 CONFLICT로 남긴다.

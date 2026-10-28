@@ -6,18 +6,18 @@
 
 ## 한 줄 설치
 
-`<USER>`와 `<REPO>`를 본인 GitHub 주소로 바꾼다. 복제와 실행은 분리돼 있다(`curl | bash` 방식 아님).
+`<USER>`와 `<REPO>`를 본인 GitHub 주소로 바꾼다. 복제와 실행은 분리돼 있다(`curl | bash` 방식 아님). 키트는 작업 공간 **밖**(형제 폴더 `../<REPO>`)에 복제한다. 그래야 키트 폴더가 제출물에 섞이지 않는다. 아래 명령은 작업 공간 안에서 실행한다.
 
 bash (Linux/macOS/Git Bash):
 
 ```bash
-git clone --depth 1 https://github.com/<USER>/<REPO>.git && bash <REPO>/bootstrap.sh --target .
+git clone --depth 1 https://github.com/<USER>/<REPO>.git ../<REPO> && bash ../<REPO>/bootstrap.sh --target .
 ```
 
 Windows PowerShell:
 
 ```powershell
-git clone --depth 1 https://github.com/<USER>/<REPO>.git; if ($LASTEXITCODE -eq 0) { & .\<REPO>\bootstrap.ps1 --target . }
+git clone --depth 1 https://github.com/<USER>/<REPO>.git ..\<REPO>; if ($LASTEXITCODE -eq 0) { & ..\<REPO>\bootstrap.ps1 --target . }
 ```
 
 실행 정책 때문에 `.ps1`이 막히면 스크립트를 우회하지 말고 아래 "스크립트를 실행할 수 없을 때"를 따른다.
@@ -73,6 +73,20 @@ Next action:
 - 대상 디렉터리 밖에는 쓰지 않으며 `~/.codex` 같은 전역 설정은 건드리지 않는다.
 - 로그는 대상의 `.kit/logs/`에만 남고 토큰 형태 문자열은 가려진다. `GITHUB_TOKEN=`, `OPENAI_API_KEY=`처럼 접두어가 붙은 이름과 `Bearer` 값도 가린다.
 - Python이 없을 때의 셸 전용 모드는 파일을 `.kit-tmp` 임시 파일에 쓴 뒤 제자리로 옮긴다. 쓰기에 실패하면 `Status: BLOCKED`(종료 코드 2)로 끝난다.
+
+## 키트 폴더 위치
+
+- 대상(`--target`, 기본은 현재 디렉터리)이 키트 폴더 자신이면 종료 코드 65로 거부한다(키트의 `AGENTS.md`가 원본이자 대상이 되어 망가지는 것을 막는다). 작업 공간에서 실행하거나 `--target <작업 공간>`을 준다. 빈 문자열 `--target ""`은 종료 코드 64다.
+- 키트는 작업 공간 밖의 형제 폴더에 복제하는 것을 권장한다. 작업 공간 안에 복제했다면 설치 후 키트 폴더를 삭제해 제출물에 남지 않게 한다.
+
+## 셸 전용 모드의 한계
+
+Python 3.9+가 없으면 `bootstrap.sh`/`bootstrap.ps1`이 `AGENTS.md`와 Skill만 복사한다(종료 코드 1, `Status: PARTIAL`). 제한 사항:
+
+- `--verify-only`는 거부한다(종료 코드 64, 아무것도 쓰지 않음). 검증은 Python이 필요하다.
+- `--offline`, `--no-mcp`, `--verbose`는 아무 효과가 없다.
+- 백업, 로그(`.kit/`), 기존 `AGENTS.md`와의 병합은 Python 모드에서만 된다. 기존 `AGENTS.md`에 키트 구간이 없으면 `CONFLICT`로 두고 직접 추가하라고 안내한다.
+- 이미 있는 Skill 폴더는 내용을 검사하지 않고 건너뛴다(`exists, not checked`).
 
 ## 스크립트를 실행할 수 없을 때
 
