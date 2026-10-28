@@ -38,8 +38,8 @@ git clone --depth 1 https://github.com/<USER>/<REPO>.git ..\<REPO>; if ($LASTEXI
 |---|---|
 | `--profile <이름>` | `core`(기본), `python`, `data`, `web`, `full` |
 | `--target <dir>` | 설치 대상 작업 공간(기본: 현재 디렉터리) |
-| `--dry-run` | 아무것도 쓰거나 실행하지 않고 계획만 출력(도구 설치·MCP 서버 시작 없음) |
-| `--verify-only` | 설치·등록 없이 현재 상태만 검사(로그만 기록) |
+| `--dry-run` | 아무것도 쓰지 않고 계획만 출력. 설치하지 않고 서버를 시작하지 않는다(`--version` 점검은 실행한다) |
+| `--verify-only` | 설치·등록 없이 현재 상태만 검사(로그만 기록). `--offline`이나 `--no-mcp`가 아니면 MCP 핸드셰이크(`npx -y`, 네트워크와 대상 밖의 npm 캐시 사용)는 여전히 실행한다 |
 | `--offline` | 네트워크를 쓰지 않음. 도구 설치와 MCP 핸드셰이크를 건너뜀(`SKIPPED`) |
 | `--no-mcp` | `.codex/config.toml` 블록을 만들지 않고 MCP 항목을 건너뜀 |
 | `--verbose` | 파일·항목별 상세 출력 |
@@ -49,9 +49,13 @@ git clone --depth 1 https://github.com/<USER>/<REPO>.git ..\<REPO>; if ($LASTEXI
 
 ## MCP
 
-`python`과 `web` 프로필은 대상의 `.codex/config.toml`에 `sequential-thinking` 서버 하나를 등록한다(`npx -y @modelcontextprotocol/server-sequential-thinking@2026.8.31`, stdio). `fetch`, `git`, `filesystem`은 후보로 기록만 하고 등록하지 않는다(사유는 `docs/SECURITY.md`). 등록은 `# hackathon-kit:begin` … `# hackathon-kit:end` 구간 안에서만 이루어지며 전역 설정은 건드리지 않는다.
+`python`, `data`, `web`, `full` 프로필(`data`와 `full`은 `python`을 상속한다)은 대상의 `.codex/config.toml`에 `sequential-thinking` 서버 하나를 등록한다(`npx -y @modelcontextprotocol/server-sequential-thinking@2026.8.31`, stdio). `fetch`, `git`, `filesystem`은 후보로 기록만 하고 등록하지 않는다(사유는 `docs/SECURITY.md`). 같은 프로필들이 `npx -y` 핸드셰이크도 한다. `full`은 도구 설치만 건너뛴다. 등록은 `# hackathon-kit:begin` … `# hackathon-kit:end` 구간 안에서만 이루어지며 전역 설정은 건드리지 않는다.
 
 Codex는 `.codex/config.toml`을 신뢰된 프로젝트에서만 로드한다. 프로젝트를 신뢰하기 전에는 `codex-mcp` 항목이 `UNVERIFIED`로 나오며 정상이다. 신뢰한 뒤 Codex에서 `/mcp`로 확인한다. MCP가 필요 없으면 `--no-mcp`를 쓴다.
+
+이전 실행에서 쓴 키트 구간이 `.codex/config.toml`에 남아 있는데 이번에는 MCP를 쓰지 않는 경우(`--no-mcp`, `core` 프로필) 키트는 아무것도 지우지 않고 선택 항목 `mcp-config`를 `FAIL`(상태 `PARTIAL`)로 보고하며 `MCP:` 줄에 `earlier kit block still registered`를 덧붙인다. 원하지 않으면 `.codex/config.toml`에서 `# hackathon-kit:begin`부터 `# hackathon-kit:end`까지 직접 지운다.
+
+Python 3.9~3.10(`tomllib` 없음)이나 TOML이 깨진 경우에도 감사는 줄 단위 검사로 원격 서버, 금지 키, 비밀 이름 env를 찾아 FAIL로 보고한다. 아무것도 못 찾으면 `UNVERIFIED`이며 `Items:`와 `Next action:`에 표시된다. 전체 감사는 Python 3.11+에서 한다.
 
 ## 종료 코드
 

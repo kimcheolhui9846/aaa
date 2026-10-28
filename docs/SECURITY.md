@@ -15,15 +15,15 @@
 
 ## 네트워크 동작과 시점
 
-네트워크는 아래 경우에만 쓰며, 보고서의 `Network:` 줄에 표시한다. `--dry-run`은 아무것도 실행하지 않는다.
+네트워크는 아래 경우에만 쓰며, 보고서의 `Network:` 줄에 표시한다. `--dry-run`은 설치하지 않고 서버를 시작하지 않는다(`--version` 점검은 실행한다). `--verify-only`는 설치하지 않지만 MCP 핸드셰이크(`npx -y`)는 `--offline`·`--no-mcp`가 아닌 한 실행하며, 이때 네트워크와 대상 밖의 npm 캐시를 쓴다.
 
 | 동작 | 언제 |
 |---|---|
 | `uv tool install <pkg>==<ver>` | python 프로필, 도구가 PATH에 없고 `uv`가 있을 때 |
 | `python -m pip install --user <pkg>==<ver>` | 위가 불가하거나 실패했을 때 |
-| `npx -y <pkg>@<ver>` | MCP 핸드셰이크(`--offline`·`--no-mcp`가 아닐 때) |
+| `npx -y <pkg>@<ver>` | MCP 핸드셰이크: python, data, web, full 프로필(`--offline`·`--no-mcp`가 아닐 때) |
 
-`core`와 `web` 프로필은 도구를 설치하지 않는다. `data`는 numpy·pandas를 설치하지 않고 명령만 안내한다. `full`은 점검만 한다.
+`core`와 `web` 프로필은 도구를 설치하지 않는다. `data`는 numpy·pandas를 설치하지 않고 명령만 안내한다. `full`은 도구를 설치하지 않지만 `python`을 상속하므로 sequential-thinking 등록과 npx 핸드셰이크는 한다.
 
 ## 알려진 한계
 

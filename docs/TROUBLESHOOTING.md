@@ -36,6 +36,7 @@
 | `tool:* install failed: <마지막 출력 줄>` | `uv tool install`과 `pip install --user`가 모두 실패했다(명령당 1회 재시도). 네트워크나 권한을 확인하거나 `--offline`으로 건너뛰고 직접 설치 |
 | `installed with ... but `pytest` is not on PATH; open a new shell or add the scripts folder to PATH` | 설치는 됐지만 PATH에 없다(`UNVERIFIED`). 새 셸을 열거나 스크립트 폴더를 PATH에 추가 |
 | `not installed; run without --verify-only to install (...)` | `--verify-only`는 설치하지 않는다. 옵션 없이 실행 |
+| `tool:* install failed: ...` (`pip install --user`) | PEP 668(Debian/Ubuntu의 externally-managed Python)이나 venv 안에서는 `pip install --user`가 실패할 수 있다. 도구 항목은 선택 `FAIL`이다. 다른 방법으로 설치하거나 `uv tool install`을 쓴다 |
 | `offline; install later with: ...` | `--offline`이라 건너뛰었다(상태를 낮추지 않음) |
 
 ## MCP
@@ -50,7 +51,9 @@
 | `cannot start server: ...` | 실행 파일을 시작하지 못했다 |
 | `codex not found; check /mcp in Codex` | `codex-mcp` `UNVERIFIED`. Codex에서 `/mcp` 확인 |
 | `not listed by `codex mcp list`; trust this project in Codex, then check /mcp` | `UNVERIFIED`. Codex에서 프로젝트를 신뢰(trust)한 뒤 `/mcp` 확인. Codex는 `.codex/config.toml`을 신뢰된 프로젝트에서만 로드한다 |
-| `TOML parse check needs Python 3.11+; ...` | `UNVERIFIED`. Python 3.11+에서는 파싱 검사를 한다. 3.9~3.10에서는 `config audit needs Python 3.11+ (tomllib)`도 나온다 |
+| `kit MCP block from an earlier run is still registered; ...` | 선택 항목 `mcp-config`가 `FAIL`(`PARTIAL`). 이번 실행은 MCP를 쓰지 않지만 이전 키트 구간이 남아 있다. 원하지 않으면 `# hackathon-kit:begin`부터 `# hackathon-kit:end`까지 직접 지운다. 키트는 지우지 않는다 |
+| `... (line scan; Python 3.11+ gives a full audit)` | Python 3.9~3.10이거나 TOML이 깨져 줄 단위 검사로 `security audit`이 FAIL이 되었다. 해당 줄을 고치거나 Python 3.11+로 다시 실행 |
+| `TOML parse check needs Python 3.11+; ...` | `UNVERIFIED`. Python 3.11+에서는 파싱 검사를 한다. 3.9~3.10에서는 줄 단위 검사로 위험 항목을 먼저 찾고, 없으면 `config audit needs Python 3.11+ (tomllib)`로 `UNVERIFIED`가 되며 `Next action:`에 직접 확인하라고 나온다 |
 
 MCP가 필요 없으면 `--no-mcp`(항목 `SKIPPED`)를 쓴다. `SKIPPED`는 상태를 낮추지 않는다.
 

@@ -29,7 +29,7 @@
 
 | 명령 | 결과 | 근거 |
 |---|---|---|
-| `uv run pytest -q` | PASS | `288 passed, 1 skipped in 35.75s` |
+| `uv run pytest -q` | PASS | `299 passed, 1 skipped in 36.43s` |
 | `uv run ruff check .` | PASS | `All checks passed!` |
 | `uv run ruff format --check .` | PASS | `49 files already formatted` |
 | `uv run python devtools/make_examples.py` | PASS | `docs/examples/{install,rerun,failure,offline,conflict}.log` 5개 생성. 네트워크 미사용, 로컬 경로는 `<target>`으로 치환 |

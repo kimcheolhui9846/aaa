@@ -5,13 +5,13 @@
 | 항목 | 요구 | 비고 |
 |---|---|---|
 | Python | 3.9+ | 없으면 셸 전용 모드(아래) |
-| TOML 파싱, 설정 감사 | Python 3.11+ (`tomllib`) | 3.9~3.10에서는 `UNVERIFIED` |
+| TOML 파싱, 설정 감사 | Python 3.11+ (`tomllib`) | 3.9~3.10에서는 줄 단위 검사로 위험 항목을 FAIL로 잡고, 못 찾으면 `UNVERIFIED` |
 | bash | 3.2+ | `bootstrap.sh` |
 | PowerShell | Windows PowerShell 5.1+ | `bootstrap.ps1` |
 | Node/npx | MCP에만 필요 | 없으면 MCP 항목이 FAIL(선택), 나머지는 정상 |
 | Codex | codex-cli 0.165.0에서 확인 | `codex mcp list --json` 형식 |
 
-Python 탐색 순서는 `$KIT_PYTHON`, `python3`, `python`, (Windows) `py -3`이다. 3.9 미만이면 없는 것으로 본다.
+Python 탐색 순서는 `$KIT_PYTHON`, `python3`, `python`, (Windows) `py -3`이다. `py -3`은 `bootstrap.ps1`만 시도한다. 3.9 미만이면 없는 것으로 본다.
 
 ## Windows의 bash
 
