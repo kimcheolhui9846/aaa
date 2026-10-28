@@ -1,0 +1,36 @@
+{
+  "servers": {
+    "sequential-thinking": {
+      "package": "@modelcontextprotocol/server-sequential-thinking",
+      "version": "2026.8.31",
+      "license": "package says 'SEE LICENSE IN LICENSE' (modelcontextprotocol/servers); 2025.12.18 declared MIT. Not re-checked for 2026.8.31.",
+      "transport": "stdio",
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-sequential-thinking@2026.8.31"],
+      "startup_timeout_sec": 30,
+      "network_egress": "npm registry download on first start; the server itself is not expected to use the network (not verified)",
+      "file_access": "none expected",
+      "enabled_by_default": true,
+      "disabled_reason": null,
+      "version_note": "2.0.0 (2026-10-19) requires node >=24; 2026.8.31 declares no engines and was chosen for older exam machines"
+    },
+    "fetch": {
+      "package": "mcp-server-fetch",
+      "transport": "stdio",
+      "enabled_by_default": false,
+      "disabled_reason": "fetches arbitrary URLs: can send task data outside the workspace"
+    },
+    "git": {
+      "package": "mcp-server-git",
+      "transport": "stdio",
+      "enabled_by_default": false,
+      "disabled_reason": "exposes git operations; remote sync and push are forbidden in the exam"
+    },
+    "filesystem": {
+      "package": "@modelcontextprotocol/server-filesystem",
+      "transport": "stdio",
+      "enabled_by_default": false,
+      "disabled_reason": "duplicates Codex's own file access and widens the reachable paths"
+    }
+  }
+}

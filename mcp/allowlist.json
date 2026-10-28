@@ -1,0 +1,6 @@
+{
+  "servers": ["sequential-thinking"],
+  "commands": ["npx", "uvx"],
+  "forbidden_keys": ["url", "bearer_token_env_var"],
+  "forbidden_env_patterns": ["(?i)_API_KEY$", "(?i)_TOKEN$", "(?i)_SECRET$"]
+}
