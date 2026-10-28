@@ -83,3 +83,24 @@ def test_dry_run_lists_config(run_kit, workspace):
     code, out = run_kit("--profile", "python", "--dry-run")
     assert code == 0 and "CREATE    .codex/config.toml" in out
     assert not (workspace / ".codex").exists()
+
+
+STALE = "kit MCP block from an earlier run is still registered"
+
+
+@pytest.mark.parametrize("second", [["--profile", "python", "--no-mcp"], ["--profile", "core"]])
+def test_stale_kit_block_is_reported_not_removed(run_kit, workspace, second):
+    run_kit("--profile", "python")
+    before = tree_digest(workspace)
+    code, out = run_kit(*second)
+    assert code == 1, out
+    assert STALE in out
+    assert "earlier kit block still registered" in out
+    assert "# hackathon-kit:begin" in out
+    after = tree_digest(workspace)
+    assert after[".codex/config.toml"] == before[".codex/config.toml"]
+
+
+def test_core_on_fresh_target_has_no_stale_item(run_kit):
+    code, out = run_kit("--profile", "core")
+    assert code == 0 and STALE not in out

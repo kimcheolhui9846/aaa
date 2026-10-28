@@ -73,6 +73,10 @@ def run(
         writable=env.target_writable,
         include_mcp=include_mcp,
     )
+    if not include_mcp:
+        stale = mcpconfig.stale_block_item(opts.target)
+        if stale is not None:
+            items.append(stale)
     items.append(audit.audit_target(opts.target, kit_root))
     items.extend(tool_items)
     if any(spec["kind"] == "node-project" for spec in profile.tools):

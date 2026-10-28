@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from pathlib import Path
 
+from . import mcpconfig
 from .cli import Options
 from .model import (
     CONFLICT,
@@ -78,6 +79,8 @@ def render(
         mcp = ", ".join(f"{i.name[4:]} {i.verified}" for i in mcp_items)
     else:
         mcp = f"none in profile '{opts.profile}'"
+    if any(i.name == "mcp-config" and i.detail == mcpconfig.STALE_DETAIL for i in items):
+        mcp += "; earlier kit block still registered"
     if network is None:
         network = "not used (--offline)" if opts.offline else "not used"
 

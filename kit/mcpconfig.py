@@ -13,6 +13,11 @@ BEGIN = "# hackathon-kit:begin"
 END = "# hackathon-kit:end"
 CONFIG_REL = ".codex/config.toml"
 TRUST_NOTE = "Codex loads .codex/config.toml only for trusted projects"
+STALE_DETAIL = (
+    "kit MCP block from an earlier run is still registered; delete the lines from "
+    "'# hackathon-kit:begin' to '# hackathon-kit:end' in .codex/config.toml "
+    "if you do not want it"
+)
 _HEADER = re.compile(
     r'^[ \t]*\[[ \t]*mcp_servers[ \t]*\.[ \t]*"?([A-Za-z0-9_-]+)"?[ \t]*\]', re.MULTILINE
 )
@@ -108,6 +113,18 @@ def check_merged(new_text: str, names: list[str]) -> str | None:
         if old_data is not None and not _preserved(old_data, new_data):
             return "merging would change existing config.toml settings"
     return None
+
+
+def stale_block_item(target: Path) -> ItemResult | None:
+    """Optional FAIL when a kit block from an earlier run is left while MCP is excluded."""
+    try:
+        text = (target / CONFIG_REL).read_bytes().decode("utf-8")
+        found = extract_block(text, BEGIN, END)
+    except (OSError, UnicodeDecodeError, MarkerError):
+        return None
+    if found is None:
+        return None
+    return ItemResult("mcp-config", False, True, True, FAIL, STALE_DETAIL)
 
 
 def verify_config(
