@@ -54,3 +54,8 @@ def test_help_exits_zero(workspace, capsys):
         parse_args(["--help"], workspace, PROFILES)
     assert exc.value.code == 0
     assert "exit codes" in capsys.readouterr().out
+
+
+def test_empty_target_is_usage_error(workspace):
+    with pytest.raises(UsageError):
+        parse_args(["--target", ""], workspace, PROFILES)

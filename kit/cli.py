@@ -69,7 +69,9 @@ def parse_args(argv: list[str], cwd: Path, profiles: list[str]) -> Options:
     ns = build_parser(profiles).parse_args(argv)
     if ns.dry_run and ns.verify_only:
         raise UsageError("--dry-run and --verify-only cannot be combined")
-    target = Path(ns.target) if ns.target else cwd
+    if ns.target is not None and not ns.target.strip():
+        raise UsageError("--target needs a non-empty directory")
+    target = Path(ns.target) if ns.target is not None else cwd
     if not target.is_absolute():
         target = cwd / target
     target = target.resolve()

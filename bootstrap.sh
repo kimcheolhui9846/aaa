@@ -68,6 +68,7 @@ while [ $# -gt 0 ]; do
       shift 2 ;;
     --target)
       [ $# -ge 2 ] || { echo "error: --target needs a value" >&2; exit 64; }
+      [ -n "$2" ] || { echo "error: --target needs a non-empty directory" >&2; exit 64; }
       TARGET="$2"
       shift 2 ;;
     --dry-run) DRY_RUN=1; shift ;;
@@ -84,6 +85,10 @@ if [ ! -d "$TARGET" ]; then
   exit 65
 fi
 TARGET="$(cd "$TARGET" && pwd)"
+if [ "$TARGET" = "$KIT_ROOT" ]; then
+  echo "error: target is the kit folder itself; run from your workspace or pass --target <workspace>" >&2
+  exit 65
+fi
 CONFLICT=0
 
 note() { printf '  %-9s %s\n' "$1" "$2"; }

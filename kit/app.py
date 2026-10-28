@@ -18,6 +18,9 @@ from .report import next_actions, overall_status, render
 from .verify import verify_target
 
 KIT_ROOT = Path(__file__).resolve().parent.parent
+SELF_TARGET_MSG = (
+    "target is the kit folder itself; run from your workspace or pass --target <workspace>"
+)
 
 
 def run(
@@ -31,6 +34,8 @@ def run(
     try:
         opts = parse_args(argv, cwd, available_profiles(kit_root))
         profile = load_profile(kit_root, opts.profile)
+        if opts.target == kit_root.resolve():
+            raise TargetError(SELF_TARGET_MSG)
     except UsageError as exc:
         print(f"error: {exc}\nRun with --help for usage.", file=sys.stderr)
         return EXIT_USAGE

@@ -145,3 +145,22 @@ def test_fallback_write_failure_is_blocked(kind, workspace):
     assert "Status:       BLOCKED" in proc.stdout
     assert (workspace / ".agents").read_bytes() == b"not a directory\n"
     assert not [p for p in workspace.rglob("*") if ".kit-tmp" in p.name]
+
+
+@pytest.mark.parametrize("kind", SHELLS)
+def test_fallback_refuses_kit_folder_as_target(kind, workspace):
+    before = (KIT_ROOT / "AGENTS.md").read_bytes()
+    for args in (["--target", _path(kind, KIT_ROOT)], []):
+        cwd = workspace if args else KIT_ROOT
+        proc = _run(kind, *args, cwd=cwd, python=NO_PYTHON)
+        assert proc.returncode == 65, proc.stdout + proc.stderr
+        assert "kit folder itself" in proc.stderr
+    assert (KIT_ROOT / "AGENTS.md").read_bytes() == before
+
+
+@pytest.mark.parametrize("kind", SHELLS)
+@pytest.mark.parametrize("with_python", [True, False])
+def test_empty_target_exits_64(kind, with_python, workspace):
+    python = _python(kind) if with_python else NO_PYTHON
+    assert _run(kind, "--target", "", cwd=workspace, python=python).returncode == 64
+

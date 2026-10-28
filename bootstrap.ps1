@@ -88,6 +88,9 @@ while ($i -lt $args.Count) {
     } elseif ($a -eq '--target') {
         if ($i + 1 -ge $args.Count) { Write-Err 'error: --target needs a value'; exit 64 }
         $Target = [string]$args[$i + 1]
+        if ([string]::IsNullOrWhiteSpace($Target)) {
+            Write-Err 'error: --target needs a non-empty directory'; exit 64
+        }
         $i += 2
     } elseif ($a -eq '--dry-run') {
         $DryRun = $true
@@ -106,6 +109,12 @@ if (-not (Test-Path -LiteralPath $Target -PathType Container)) {
     exit 65
 }
 $Target = (Resolve-Path -LiteralPath $Target).ProviderPath
+$KitFull = (Resolve-Path -LiteralPath $KitRoot).ProviderPath
+$Seps = [char[]]@(92, 47)
+if ($Target.TrimEnd($Seps) -ieq $KitFull.TrimEnd($Seps)) {
+    Write-Err 'error: target is the kit folder itself; run from your workspace or pass --target <workspace>'
+    exit 65
+}
 $Utf8NoBom = New-Object System.Text.UTF8Encoding $false
 $Conflict = $false
 
