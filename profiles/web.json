@@ -1,0 +1,9 @@
+{
+  "name": "web",
+  "description": "core plus a read-only check of the target's package.json, lockfile and engines.node, and the sequential-thinking MCP server. Installs nothing.",
+  "extends": "core",
+  "tools": [
+    {"name": "node-project", "kind": "node-project"}
+  ],
+  "mcp": ["sequential-thinking"]
+}

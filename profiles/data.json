@@ -1,0 +1,9 @@
+{
+  "name": "data",
+  "description": "python plus a check for numpy and pandas. Never installs them; prints the install command instead.",
+  "extends": "python",
+  "tools": [
+    {"name": "numpy", "kind": "python-lib", "package": "numpy"},
+    {"name": "pandas", "kind": "python-lib", "package": "pandas"}
+  ]
+}
