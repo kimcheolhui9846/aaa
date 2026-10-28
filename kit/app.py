@@ -6,7 +6,7 @@ import sys
 from pathlib import Path
 from typing import TextIO
 
-from . import audit, mcpconfig, tools
+from . import audit, mcpconfig, tools, webcheck
 from .cli import Options, parse_args
 from .fsops import PathEscapeError, State, timestamp
 from .logs import write_log
@@ -75,6 +75,8 @@ def run(
     )
     items.append(audit.audit_target(opts.target, kit_root))
     items.extend(tool_items)
+    if any(spec["kind"] == "node-project" for spec in profile.tools):
+        items.append(webcheck.check_node_project(opts.target, env.tools.get("node")))
     status, code = overall_status(items)
     network = _network_line(opts, actions)
     lines.append(
