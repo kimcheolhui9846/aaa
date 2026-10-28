@@ -6,6 +6,7 @@ import sys
 from pathlib import Path
 from typing import TextIO
 
+from . import mcpconfig
 from .cli import Options, parse_args
 from .fsops import PathEscapeError, State, timestamp
 from .logs import write_log
@@ -34,6 +35,7 @@ def run(
     try:
         opts = parse_args(argv, cwd, available_profiles(kit_root))
         profile = load_profile(kit_root, opts.profile)
+        mcpconfig.select_servers(kit_root, profile.mcp)
         if opts.target == kit_root.resolve():
             raise TargetError(SELF_TARGET_MSG)
     except UsageError as exc:
@@ -45,7 +47,8 @@ def run(
 
     env = run_preflight(opts.target)
     state = State.load(opts.target)
-    changes = plan_changes(opts.target, kit_root, profile, state)
+    include_mcp = bool(profile.mcp) and not opts.no_mcp
+    changes = plan_changes(opts.target, kit_root, profile, state, include_mcp)
 
     if opts.dry_run:
         out.write(_dry_run_text(opts, env, changes))
@@ -66,6 +69,7 @@ def run(
         changes,
         check_writable=not opts.verify_only,
         writable=env.target_writable,
+        include_mcp=include_mcp,
     )
     status, code = overall_status(items)
     lines.append(render(env, opts, items, status, next_actions(items, opts.target, status)))

@@ -5,7 +5,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from pathlib import Path
 
-from . import agentsmd
+from . import agentsmd, mcpconfig
 from .fsops import PathEscapeError, State, safe_path, sha256
 from .model import Outcome
 from .profiles import Profile
@@ -30,9 +30,9 @@ def iter_skill_files(kit_root: Path, name: str) -> list[tuple[str, bytes]]:
     ]
 
 
-def plan_agents_md(target: Path, kit_root: Path, state: State) -> FileChange:
-    rel = owner = "AGENTS.md"
-    body = (kit_root / "AGENTS.md").read_text(encoding="utf-8")
+def _plan_block(
+    target: Path, rel: str, owner: str, body: str, state: State, begin: str, end: str
+) -> FileChange:
     try:
         path = safe_path(target, rel)
         if path.exists() and not path.is_file():
@@ -43,14 +43,31 @@ def plan_agents_md(target: Path, kit_root: Path, state: State) -> FileChange:
     except PathEscapeError as exc:
         return FileChange(rel, owner, Outcome.CONFLICT, detail=str(exc))
     except UnicodeDecodeError:
-        return FileChange(rel, owner, Outcome.CONFLICT, detail="existing AGENTS.md is not UTF-8")
+        return FileChange(rel, owner, Outcome.CONFLICT, detail=f"existing {rel} is not UTF-8")
     except OSError as exc:
-        return FileChange(rel, owner, Outcome.CONFLICT, detail=f"cannot read AGENTS.md: {exc}")
-    text, outcome, detail = agentsmd.merge(existing, body, state.files.get(rel))
+        return FileChange(rel, owner, Outcome.CONFLICT, detail=f"cannot read {rel}: {exc}")
+    text, outcome, detail = agentsmd.merge(existing, body, state.files.get(rel), begin, end)
     if outcome == Outcome.CONFLICT:
         return FileChange(rel, owner, outcome, detail=detail)
     data = text.encode("utf-8") if text is not None else None
     return FileChange(rel, owner, outcome, data, sha256(body.strip().encode("utf-8")), detail)
+
+
+def plan_agents_md(target: Path, kit_root: Path, state: State) -> FileChange:
+    body = (kit_root / "AGENTS.md").read_text(encoding="utf-8")
+    return _plan_block(target, "AGENTS.md", "AGENTS.md", body, state, agentsmd.BEGIN, agentsmd.END)
+
+
+def plan_mcp_config(target: Path, kit_root: Path, names: list[str], state: State) -> FileChange:
+    body = mcpconfig.render_servers(mcpconfig.select_servers(kit_root, names))
+    change = _plan_block(
+        target, mcpconfig.CONFIG_REL, "mcp-config", body, state, mcpconfig.BEGIN, mcpconfig.END
+    )
+    if change.data is not None:
+        problem = mcpconfig.check_merged(change.data.decode("utf-8"), names)
+        if problem:
+            return FileChange(change.rel, change.owner, Outcome.CONFLICT, detail=problem)
+    return change
 
 
 def plan_file(target: Path, rel: str, owner: str, data: bytes, state: State) -> FileChange:
@@ -79,11 +96,15 @@ def plan_file(target: Path, rel: str, owner: str, data: bytes, state: State) -> 
     )
 
 
-def plan_changes(target: Path, kit_root: Path, profile: Profile, state: State) -> list[FileChange]:
+def plan_changes(
+    target: Path, kit_root: Path, profile: Profile, state: State, include_mcp: bool = True
+) -> list[FileChange]:
     changes = [plan_agents_md(target, kit_root, state)]
     for name in profile.skills:
         for rel, data in iter_skill_files(kit_root, name):
             changes.append(plan_file(target, rel, f"skill:{name}", data, state))
+    if include_mcp and profile.mcp:
+        changes.append(plan_mcp_config(target, kit_root, profile.mcp, state))
     return changes
 
 
