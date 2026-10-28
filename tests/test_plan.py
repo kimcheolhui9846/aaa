@@ -1,3 +1,5 @@
+from pathlib import Path
+
 from kit.fsops import State, sha256
 from kit.model import Outcome
 from kit.plan import FileChange, format_plan, plan_changes, plan_file
@@ -71,3 +73,24 @@ def test_format_plan_hides_unchanged_unless_verbose():
         "Summary:      1 create, 0 update, 0 append, 0 conflict, 1 unchanged"
     )
     assert "UNCHANGED b" in format_plan(changes, verbose=True)
+
+
+def test_agents_md_directory_conflicts(kit_root, workspace):
+    (workspace / "AGENTS.md").mkdir()
+    change = plan_changes(workspace, kit_root, load_profile(kit_root, "core"), State())[0]
+    assert change.outcome == Outcome.CONFLICT and "not a regular file" in change.detail
+
+
+def test_unreadable_file_conflicts(workspace, monkeypatch):
+    target = workspace / "f.txt"
+    target.write_bytes(b"data")
+    original = Path.read_bytes
+
+    def denied(self):
+        if self == target:
+            raise PermissionError("denied")
+        return original(self)
+
+    monkeypatch.setattr(Path, "read_bytes", denied)
+    change = plan_file(workspace, "f.txt", "o", b"new", State())
+    assert change.outcome == Outcome.CONFLICT and "cannot read" in change.detail

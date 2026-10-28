@@ -35,11 +35,17 @@ def plan_agents_md(target: Path, kit_root: Path, state: State) -> FileChange:
     body = (kit_root / "AGENTS.md").read_text(encoding="utf-8")
     try:
         path = safe_path(target, rel)
+        if path.exists() and not path.is_file():
+            return FileChange(
+                rel, owner, Outcome.CONFLICT, detail="exists but is not a regular file"
+            )
         existing = path.read_bytes().decode("utf-8") if path.is_file() else None
     except PathEscapeError as exc:
         return FileChange(rel, owner, Outcome.CONFLICT, detail=str(exc))
     except UnicodeDecodeError:
         return FileChange(rel, owner, Outcome.CONFLICT, detail="existing AGENTS.md is not UTF-8")
+    except OSError as exc:
+        return FileChange(rel, owner, Outcome.CONFLICT, detail=f"cannot read AGENTS.md: {exc}")
     text, outcome, detail = agentsmd.merge(existing, body, state.files.get(rel))
     if outcome == Outcome.CONFLICT:
         return FileChange(rel, owner, outcome, detail=detail)
@@ -57,7 +63,10 @@ def plan_file(target: Path, rel: str, owner: str, data: bytes, state: State) -> 
         return FileChange(rel, owner, Outcome.CREATE, data, new_hash)
     if not path.is_file():
         return FileChange(rel, owner, Outcome.CONFLICT, detail="exists but is not a regular file")
-    current = sha256(path.read_bytes())
+    try:
+        current = sha256(path.read_bytes())
+    except OSError as exc:
+        return FileChange(rel, owner, Outcome.CONFLICT, detail=f"cannot read file: {exc}")
     if current == new_hash:
         return FileChange(rel, owner, Outcome.UNCHANGED, None, new_hash)
     if state.files.get(rel) == current:
