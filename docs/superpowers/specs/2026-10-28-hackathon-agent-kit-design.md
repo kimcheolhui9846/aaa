@@ -62,7 +62,7 @@ kit/                (Python 표준 라이브러리만 사용)
 
 ### 3.2 상태와 멱등성
 
-- `<target>/.kit/state.json`: kit가 쓴 파일 경로와 SHA-256 해시, 마지막 실행 시각, 프로필.
+- `<target>/.kit/state.json`: kit가 쓴 파일 경로와 SHA-256 해시, 프로필. 실행 시각은 넣지 않는다(재실행 시 바이트 동일해야 멱등성 검사가 성립).
 - `<target>/.kit/backups/<YYYYmmdd-HHMMSS>/`: 수정 전 원본.
 - 재실행 시: 대상 파일 해시 == 기록 해시 == 새 내용 해시 → 건너뜀. 대상 해시 == 기록 해시 ≠ 새 내용 → 갱신(백업 후). 대상 해시 ≠ 기록 해시 → 사용자가 수정한 것 → `CONFLICT`, 덮어쓰지 않음.
 - state.json에 기록이 없는데 같은 경로에 파일이 있음 → 내용이 같으면 채택(adopt), 다르면 `CONFLICT`.
@@ -88,7 +88,7 @@ kit/                (Python 표준 라이브러리만 사용)
 
 - frontmatter는 `name`, `description`만. description은 "Use when …"으로 시작하고 "Do NOT use when …"을 포함하며 약 300자. 6개 합계 2,000자 이하.
 - 본문은 150줄 이하 절차 체크리스트.
-- 언어별 명령(테스트 러너, 린터, 프로파일러)은 `.agents/skills/_shared/` 같은 공유 폴더 대신 각 Skill의 `references/languages.md`에 둔다. Codex는 Skill 폴더 단위로 읽으므로 공유 폴더를 가정하지 않는다. 중복은 Python 기본 + C++/Java/JS 짧은 표로 제한한다.
+- 언어별 명령(테스트 러너, 린터, 프로파일러)은 `.agents/skills/_shared/` 같은 공유 폴더 대신 각 Skill의 `references/languages.md`에 둔다. Codex는 Skill 폴더 단위로 읽으므로 공유 폴더를 가정하지 않는다. 중복은 Python 기본 + C++/Java/JS 짧은 표로 제한한다. 실행 명령이 필요한 4개(tdd-automator, algorithm-optimizer, submission-validator, benchmark)만 이 파일을 가진다. task-router와 implementation-review는 명령을 실행하지 않으므로 두지 않는다.
 - 외부 전송 금지, 서술형 단계 지원 금지, 제출 버튼·브라우저 조작 금지는 AGENTS.md에 한 번만 둔다.
 - 각 Skill은 `examples/`에 공개·가상 모의 과제 1건을 둔다.
 
@@ -181,7 +181,8 @@ kit/                (Python 표준 라이브러리만 사용)
 
 - `bootstrap.sh`(bash 3.2+ 호환), `bootstrap.ps1`(Windows PowerShell 5.1+ 호환). 같은 옵션, 같은 종료 코드.
 - Python 탐색 순서: `$KIT_PYTHON` → `python3` → `python` → (Windows) `py -3`. 버전이 3.9 미만이거나 Windows Store 별칭 스텁이면 부재로 간주.
-- Python 부재 시 최소 배치: `<target>/AGENTS.md`가 없으면 kit의 AGENTS.md 복사, 있으면 CONFLICT. `<target>/.agents/skills/<name>/`이 없으면 복사, 있으면 건너뜀. MCP·도구 설치는 하지 않음. 상태 PARTIAL(1), 수동 확인 안내 출력.
+- Python 부재 시 최소 배치: `<target>/AGENTS.md`가 없으면 보호 구간으로 감싼 kit AGENTS.md 생성, 이미 보호 구간이 있으면 건너뜀, 보호 구간 없는 기존 파일이면 CONFLICT. `<target>/.agents/skills/<name>/`이 없으면 복사, 있으면 건너뜀. MCP·도구 설치는 하지 않음. AGENTS.md CONFLICT면 5.3 규칙대로 BLOCKED(2), 그 외에는 PARTIAL(1). 수동 확인 안내 출력.
+- 셸이 Python에 넘길 때는 `PYTHONPATH` 대신 저장소 루트의 `run_kit.py`를 `python -I`로 실행한다. Git Bash가 `:` 구분 경로 목록을 Windows Python에 넘길 때 깨지는 문제를 피하고, 현재 디렉터리의 모듈이 끼어드는 것도 막는다.
 - `--dry-run`은 셸 경로에서도 지원한다.
 
 ## 10. 테스트
