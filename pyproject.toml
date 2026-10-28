@@ -16,6 +16,7 @@ markers = ["real_preflight: run real tool probes instead of the fast fake"]
 [tool.ruff]
 target-version = "py39"
 line-length = 100
+extend-exclude = ["docs"]
 
 [tool.ruff.lint]
 select = ["E", "F", "I", "B"]
