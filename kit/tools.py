@@ -2,7 +2,8 @@
 
 from __future__ import annotations
 
-import importlib.util
+import importlib.machinery
+import site
 import subprocess
 import sys
 from collections.abc import Callable
@@ -66,9 +67,14 @@ def install_commands(spec: dict, env: EnvReport) -> list[list[str]]:
 
 
 def _importable(package: str) -> bool:
+    """Look on sys.path and in the user site (the kit runs with `python -I`, user site off)."""
     try:
-        return importlib.util.find_spec(package) is not None
-    except (ImportError, ValueError):
+        paths = list(sys.path)
+        user_site = site.getusersitepackages()
+        if user_site not in paths:
+            paths.append(user_site)
+        return importlib.machinery.PathFinder.find_spec(package, paths) is not None
+    except (ImportError, ValueError, OSError, AttributeError):
         return False
 
 
