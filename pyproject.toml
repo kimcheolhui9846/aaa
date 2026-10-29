@@ -1,0 +1,28 @@
+[project]
+name = "hackathon-agent-kit"
+version = "0.1.0"
+description = "Bootstrap kit that installs AGENTS.md and Codex skills into a workspace"
+requires-python = ">=3.9"
+dependencies = []
+
+[tool.uv]
+package = false
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]
+markers = ["real_preflight: run real tool probes instead of the fast fake"]
+
+[tool.ruff]
+target-version = "py39"
+line-length = 100
+extend-exclude = ["docs", ".agents"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B"]
+
+[dependency-groups]
+dev = [
+    "pytest>=8.4.2",
+    "ruff>=0.17.3",
+]
