@@ -34,6 +34,7 @@
 | `uv run ruff format --check .` | PASS | `49 files already formatted` |
 | `uv run python devtools/make_examples.py` | PASS | `docs/examples/{install,rerun,failure,offline,conflict}.log` 5개 생성. 네트워크 미사용, 로컬 경로는 `<target>`으로 치환 |
 | 실제 npx로 sequential-thinking 핸드셰이크 | UNVERIFIED | `bootstrap.ps1 --profile python --target <빈 폴더>`로 사용자가 확인 |
+| Codex `/mcp`에 sequential-thinking 표시 | PASS | 2026-10-29, codex-cli 0.165.0 + FactChat 프로필. 키트를 `--profile python --offline`으로 설치한 작업 공간을 Codex에서 신뢰한 뒤 `/mcp`에 표시됨(사용자 확인). Codex가 직접 `npx`로 서버를 띄움 |
 
 ## 예시 로그 판정
 
