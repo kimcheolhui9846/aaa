@@ -22,6 +22,54 @@ git clone --depth 1 https://github.com/kimcheolhui9846/aaa.git ..\aaa; if ($LAST
 
 실행 정책 때문에 `.ps1`이 막히면 스크립트를 우회하지 말고 아래 "스크립트를 실행할 수 없을 때"를 따른다.
 
+## 시험 당일 설치: 두 가지 방법
+
+코파 원격 환경 시험에서는 **방법 1**을 쓴다. 명령은 미리 복사해 두거나 메모에 띄워 둔다. 원격 환경에서 GitHub 접속, Python, Node가 되는지는 사전 체험 때 `docs/RULES_CHECKLIST.md`로 확인한다.
+
+### 방법 1. 공개 저장소에서 받아 설치 (어느 PC든)
+
+작업 폴더 안에서 실행한다. 키트는 형제 폴더 `..\aaa`에 받는다.
+
+```powershell
+git clone --depth 1 https://github.com/kimcheolhui9846/aaa ..\aaa; ..\aaa\bootstrap.ps1
+```
+
+```bash
+git clone --depth 1 https://github.com/kimcheolhui9846/aaa ../aaa && bash ../aaa/bootstrap.sh
+```
+
+`--target`을 빼면 현재 폴더에 설치한다. 프로필은 끝에 `--profile python`처럼 붙인다. 이 방법은 당일 GitHub에 접속할 수 있어야 한다.
+
+### 방법 2. 개인 노트북에 미리 세팅하고 함수로 호출
+
+**코파 플랫폼 시험에는 쓸 수 없다.** 시험은 코파가 제공하는 원격 환경의 Codex에서 진행되므로 노트북 설정이 넘어가지 않는다. 시험 당일에는 방법 1을 쓴다. 이 방법은 본인 PC에서 연습하거나, Codex를 로컬에서 직접 쓰는 경우를 위한 것이다.
+
+시험 전에 노트북에서 한 번만 한다.
+
+1. git, Python 3.9 이상, Codex를 설치한다. MCP를 쓰려면 Node.js도 설치한다.
+2. 키트를 고정 위치에 받는다.
+   ```powershell
+   git clone https://github.com/kimcheolhui9846/aaa C:\kit
+   ```
+3. 스크립트 실행을 현재 사용자에게만 허용한다(관리자 권한 불필요).
+   ```powershell
+   Set-ExecutionPolicy -Scope CurrentUser RemoteSigned
+   ```
+4. PowerShell 프로필에 함수를 등록한다. `notepad $PROFILE`로 열고(파일이 없으면 먼저 `New-Item -ItemType File -Force $PROFILE`) 아래를 붙여 넣는다.
+   ```powershell
+   function kit { & "C:\kit\bootstrap.ps1" @args }
+   function kit-update { git -C C:\kit pull --ff-only }
+   ```
+5. PowerShell을 새로 열고 빈 폴더에서 `kit`을 실행해 `Status: READY`가 나오는지 확인한다.
+
+당일에는 작업 폴더에서 `kit` 또는 `kit --profile python`만 친다. 설치에 네트워크가 필요 없다. 시험 전날 `kit-update`로 최신 버전을 받아 둔다.
+
+### 설치 뒤 공통 확인
+
+1. Codex를 **키트를 설치한 작업 폴더에서** 연다. 다른 폴더에서 열면 키트 Skill이 보이지 않는다.
+2. 신뢰(trust) 확인창이 뜨면 신뢰를 고른다. MCP는 신뢰한 폴더에서만 켜진다. Skill과 AGENTS.md는 신뢰와 무관하게 읽힌다.
+3. `/skills`로 키트 Skill을, `/mcp`로 `sequential-thinking`을 확인한다. 안 보이면 `docs/RULES_CHECKLIST.md`의 대체 경로를 따른다.
+
 ## 프로필
 
 | 프로필 | 내용 |
