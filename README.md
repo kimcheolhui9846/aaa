@@ -6,18 +6,18 @@
 
 ## 한 줄 설치
 
-`<USER>`와 `<REPO>`를 본인 GitHub 주소로 바꾼다. 복제와 실행은 분리돼 있다(`curl | bash` 방식 아님). 키트는 작업 공간 **밖**(형제 폴더 `../<REPO>`)에 복제한다. 그래야 키트 폴더가 제출물에 섞이지 않는다. 아래 명령은 작업 공간 안에서 실행한다.
+저장소 주소는 `https://github.com/kimcheolhui9846/aaa`다. 설치는 기본 브랜치 `main`에서 받으므로, 시험 전에 작업 브랜치를 `main`에 병합해 둔다. 복제와 실행은 분리돼 있다(`curl | bash` 방식 아님). 키트는 작업 공간 **밖**(형제 폴더 `../aaa`)에 복제한다. 그래야 키트 폴더가 제출물에 섞이지 않는다. 아래 명령은 작업 공간 안에서 실행한다.
 
 bash (Linux/macOS/Git Bash):
 
 ```bash
-git clone --depth 1 https://github.com/<USER>/<REPO>.git ../<REPO> && bash ../<REPO>/bootstrap.sh --target .
+git clone --depth 1 https://github.com/kimcheolhui9846/aaa.git ../aaa && bash ../aaa/bootstrap.sh --target .
 ```
 
 Windows PowerShell:
 
 ```powershell
-git clone --depth 1 https://github.com/<USER>/<REPO>.git ..\<REPO>; if ($LASTEXITCODE -eq 0) { & ..\<REPO>\bootstrap.ps1 --target . }
+git clone --depth 1 https://github.com/kimcheolhui9846/aaa.git ..\aaa; if ($LASTEXITCODE -eq 0) { & ..\aaa\bootstrap.ps1 --target . }
 ```
 
 실행 정책 때문에 `.ps1`이 막히면 스크립트를 우회하지 말고 아래 "스크립트를 실행할 수 없을 때"를 따른다.
@@ -139,6 +139,7 @@ shellcheck bootstrap.sh
 ## 공개 전 점검
 
 - [ ] `LICENSE`(MIT) 저자·연도 확인
-- [ ] README의 `<USER>/<REPO>`를 실제 주소로 교체
+- [x] README의 저장소 주소를 실제 주소로 교체
+- [ ] 시험 전에 PR을 `main`에 병합 (한 줄 설치는 `main`을 받는다)
 - [ ] 저장소에 토큰·개인 경로·시험 관련 비공개 자료가 없는지 확인
 - [ ] `docs/TEST_REPORT.md`가 최신인지 확인
