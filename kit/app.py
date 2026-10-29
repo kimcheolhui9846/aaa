@@ -6,6 +6,7 @@ import sys
 from pathlib import Path
 from typing import TextIO
 
+from . import audit, mcpcheck, mcpconfig, tools, webcheck
 from .cli import Options, parse_args
 from .fsops import PathEscapeError, State, timestamp
 from .logs import write_log
@@ -34,6 +35,7 @@ def run(
     try:
         opts = parse_args(argv, cwd, available_profiles(kit_root))
         profile = load_profile(kit_root, opts.profile)
+        mcpconfig.select_servers(kit_root, profile.mcp)
         if opts.target == kit_root.resolve():
             raise TargetError(SELF_TARGET_MSG)
     except UsageError as exc:
@@ -45,10 +47,12 @@ def run(
 
     env = run_preflight(opts.target)
     state = State.load(opts.target)
-    changes = plan_changes(opts.target, kit_root, profile, state)
+    include_mcp = bool(profile.mcp) and not opts.no_mcp
+    changes = plan_changes(opts.target, kit_root, profile, state, include_mcp)
+    actions = tools.plan_tools(profile, env, opts.offline, opts.verify_only)
 
     if opts.dry_run:
-        out.write(_dry_run_text(opts, env, changes))
+        out.write(_dry_run_text(opts, env, changes, actions, profile))
         return EXIT_READY
 
     stamp = timestamp()
@@ -58,6 +62,7 @@ def run(
             apply_changes(opts.target, changes, state, stamp, opts.profile)
         except (OSError, PathEscapeError) as exc:
             lines.append(f"error: write failed: {exc}")
+    tool_items = tools.run_tools(actions)
 
     items = verify_target(
         opts.target,
@@ -66,9 +71,27 @@ def run(
         changes,
         check_writable=not opts.verify_only,
         writable=env.target_writable,
+        include_mcp=include_mcp,
     )
+    if not include_mcp:
+        stale = mcpconfig.stale_block_item(opts.target)
+        if stale is not None:
+            items.append(stale)
+    items.append(audit.audit_target(opts.target, kit_root))
+    items.extend(tool_items)
+    if any(spec["kind"] == "node-project" for spec in profile.tools):
+        items.append(webcheck.check_node_project(opts.target, env.tools.get("node")))
+    if profile.mcp:
+        items.extend(
+            mcpcheck.check_servers(
+                kit_root, profile.mcp, env, opts.target, opts.offline, opts.no_mcp
+            )
+        )
     status, code = overall_status(items)
-    lines.append(render(env, opts, items, status, next_actions(items, opts.target, status)))
+    network = _network_line(opts, actions, profile)
+    lines.append(
+        render(env, opts, items, status, next_actions(items, opts.target, status), network)
+    )
     text = "\n".join(lines)
     out.write(text)
     if env.target_writable:
@@ -89,16 +112,47 @@ def main(argv: list[str]) -> int:
         return EXIT_BLOCKED
 
 
-def _dry_run_text(opts: Options, env: EnvReport, changes: list[FileChange]) -> str:
-    return "\n".join(
-        [
-            f"Environment:  {env.os} {env.arch}, shell={env.shell}, python {env.python}",
-            f"Target:       {opts.target}",
-            f"Profile:      {opts.profile}",
-            "Network:      none (this profile installs no tools)",
-            "Planned changes:",
-            format_plan(changes, opts.verbose),
-            "DRY RUN: nothing was written.",
-            "",
-        ]
-    )
+def _network_line(opts: Options, actions, profile) -> str:
+    if opts.offline:
+        return "not used (--offline)"
+    used = tools.network_used(actions)
+    if profile.mcp and not opts.no_mcp:
+        used.append("npx (MCP handshake)")
+    return "used: " + "; ".join(used) if used else "not used"
+
+
+def _dry_run_text(
+    opts: Options, env: EnvReport, changes: list[FileChange], actions, profile
+) -> str:
+    planned = tools.network_used(actions)
+    if profile.mcp and not opts.no_mcp:
+        planned.append("npx (MCP handshake)")
+    if opts.offline:
+        network = "none (--offline)"
+    elif planned:
+        network = "would use: " + "; ".join(planned)
+    elif not profile.tools and not profile.mcp:
+        network = "none (this profile installs no tools)"
+    else:
+        network = "none"
+    lines = [
+        f"Environment:  {env.os} {env.arch}, shell={env.shell}, python {env.python}",
+        f"Target:       {opts.target}",
+        f"Profile:      {opts.profile}",
+        f"Network:      {network}",
+        "Planned changes:",
+        format_plan(changes, opts.verbose),
+    ]
+    if actions:
+        lines += ["Planned tools:", tools.format_tool_plan(actions)]
+    if profile.mcp:
+        reason = "--no-mcp" if opts.no_mcp else ("--offline" if opts.offline else None)
+        lines.append("Planned MCP checks:")
+        for name in profile.mcp:
+            lines.append(
+                f"  SKIPPED   mcp:{name}  ({reason})"
+                if reason
+                else f"  HANDSHAKE mcp:{name}  (npx -y <pinned package>) [network]"
+            )
+    lines += ["DRY RUN: nothing was written.", ""]
+    return "\n".join(lines)

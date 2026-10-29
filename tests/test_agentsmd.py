@@ -100,3 +100,11 @@ def test_merge_updates_crlf_block_written_by_kit():
 
 def test_extract_block_normalizes_crlf_interior():
     assert extract_block(f"{BEGIN}\r\na\r\nb\r\n{END}\r\n")[2] == "a\nb"
+
+
+def test_custom_markers_round_trip():
+    text, outcome, _ = merge("a = 1\n", "x = 2", None, "# b", "# e")
+    assert outcome == "append"
+    assert text == "a = 1\n\n# b\nx = 2\n# e\n"
+    assert extract_block(text, "# b", "# e")[2] == "x = 2"
+    assert extract_block(text) is None

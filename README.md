@@ -6,34 +6,56 @@
 
 ## 한 줄 설치
 
-`<USER>`와 `<REPO>`를 본인 GitHub 주소로 바꾼다. 복제와 실행은 분리돼 있다(`curl | bash` 방식 아님). 키트는 작업 공간 **밖**(형제 폴더 `../<REPO>`)에 복제한다. 그래야 키트 폴더가 제출물에 섞이지 않는다. 아래 명령은 작업 공간 안에서 실행한다.
+저장소 주소는 `https://github.com/kimcheolhui9846/aaa`다. 설치는 기본 브랜치 `main`에서 받으므로, 시험 전에 작업 브랜치를 `main`에 병합해 둔다. 복제와 실행은 분리돼 있다(`curl | bash` 방식 아님). 키트는 작업 공간 **밖**(형제 폴더 `../aaa`)에 복제한다. 그래야 키트 폴더가 제출물에 섞이지 않는다. 아래 명령은 작업 공간 안에서 실행한다.
 
 bash (Linux/macOS/Git Bash):
 
 ```bash
-git clone --depth 1 https://github.com/<USER>/<REPO>.git ../<REPO> && bash ../<REPO>/bootstrap.sh --target .
+git clone --depth 1 https://github.com/kimcheolhui9846/aaa.git ../aaa && bash ../aaa/bootstrap.sh --target .
 ```
 
 Windows PowerShell:
 
 ```powershell
-git clone --depth 1 https://github.com/<USER>/<REPO>.git ..\<REPO>; if ($LASTEXITCODE -eq 0) { & ..\<REPO>\bootstrap.ps1 --target . }
+git clone --depth 1 https://github.com/kimcheolhui9846/aaa.git ..\aaa; if ($LASTEXITCODE -eq 0) { & ..\aaa\bootstrap.ps1 --target . }
 ```
 
 실행 정책 때문에 `.ps1`이 막히면 스크립트를 우회하지 말고 아래 "스크립트를 실행할 수 없을 때"를 따른다.
+
+## 프로필
+
+| 프로필 | 내용 |
+|---|---|
+| `core` | AGENTS.md and the six kit skills. Installs no tools and no MCP servers. (기본값) |
+| `python` | core plus pytest and ruff (installed only when missing) and the sequential-thinking MCP server. |
+| `data` | python plus a check for numpy and pandas. Never installs them; prints the install command instead. |
+| `web` | core plus a read-only check of the target's package.json, lockfile and engines.node, and the sequential-thinking MCP server. Installs nothing. |
+| `full` | Development only. Checks every candidate (python, data, web, MCP) and reports what it would install; installs no tools. |
 
 ## 옵션
 
 | 옵션 | 의미 |
 |---|---|
-| `--profile core` | 기본값. AGENTS.md와 Skill 6개만 설치(도구·MCP 없음). 다른 프로필은 계획 2에서 추가 |
+| `--profile <이름>` | `core`(기본), `python`, `data`, `web`, `full` |
 | `--target <dir>` | 설치 대상 작업 공간(기본: 현재 디렉터리) |
-| `--dry-run` | 아무것도 쓰지 않고 계획만 출력 |
-| `--verify-only` | 설치 없이 현재 상태만 검사(로그만 기록) |
-| `--offline` | 네트워크를 쓰지 않음(core는 원래 쓰지 않음) |
-| `--no-mcp` | MCP를 건너뜀 |
+| `--dry-run` | 아무것도 쓰지 않고 계획만 출력. 설치하지 않고 서버를 시작하지 않는다(`--version` 점검은 실행한다) |
+| `--verify-only` | 설치·등록 없이 현재 상태만 검사(로그만 기록). `--offline`이나 `--no-mcp`가 아니면 MCP 핸드셰이크(`npx -y`, 네트워크와 대상 밖의 npm 캐시 사용)는 여전히 실행한다 |
+| `--offline` | 네트워크를 쓰지 않음. 도구 설치와 MCP 핸드셰이크를 건너뜀(`SKIPPED`) |
+| `--no-mcp` | `.codex/config.toml` 블록을 만들지 않고 MCP 항목을 건너뜀 |
 | `--verbose` | 파일·항목별 상세 출력 |
 | `--help` | 도움말 |
+
+네트워크는 `python` 프로필이 pytest·ruff를 설치할 때(`uv tool install`, 실패하면 `pip install --user`)와 MCP 핸드셰이크(`npx -y`)에서만 쓴다. `core`와 `web`은 도구를 설치하지 않는다. 쓰는 경우 보고서의 `Network:` 줄에 표시한다. 자세한 내용은 `docs/SECURITY.md`를 본다.
+
+## MCP
+
+`python`, `data`, `web`, `full` 프로필(`data`와 `full`은 `python`을 상속한다)은 대상의 `.codex/config.toml`에 `sequential-thinking` 서버 하나를 등록한다(`npx -y @modelcontextprotocol/server-sequential-thinking@2026.8.31`, stdio). `fetch`, `git`, `filesystem`은 후보로 기록만 하고 등록하지 않는다(사유는 `docs/SECURITY.md`). 같은 프로필들이 `npx -y` 핸드셰이크도 한다. `full`은 도구 설치만 건너뛴다. 등록은 `# hackathon-kit:begin` … `# hackathon-kit:end` 구간 안에서만 이루어지며 전역 설정은 건드리지 않는다.
+
+Codex는 `.codex/config.toml`을 신뢰된 프로젝트에서만 로드한다. 프로젝트를 신뢰하기 전에는 `codex-mcp` 항목이 `UNVERIFIED`로 나오며 정상이다. 신뢰한 뒤 Codex에서 `/mcp`로 확인한다. MCP가 필요 없으면 `--no-mcp`를 쓴다.
+
+이전 실행에서 쓴 키트 구간이 `.codex/config.toml`에 남아 있는데 이번에는 MCP를 쓰지 않는 경우(`--no-mcp`, `core` 프로필) 키트는 아무것도 지우지 않고 선택 항목 `mcp-config`를 `FAIL`(상태 `PARTIAL`)로 보고하며 `MCP:` 줄에 `earlier kit block still registered`를 덧붙인다. 원하지 않으면 `.codex/config.toml`에서 `# hackathon-kit:begin`부터 `# hackathon-kit:end`까지 직접 지운다.
+
+Python 3.9~3.10(`tomllib` 없음)이나 TOML이 깨진 경우에도 감사는 줄 단위 검사로 원격 서버, 금지 키, 비밀 이름 env를 찾아 FAIL로 보고한다. 아무것도 못 찾으면 `UNVERIFIED`이며 `Items:`와 `Next action:`에 표시된다. 전체 감사는 Python 3.11+에서 한다.
 
 ## 종료 코드
 
@@ -62,6 +84,8 @@ Next action:
   - Open Codex in D:\work\task and run /skills to confirm the kit skills load.
 ```
 
+예시 로그는 `docs/examples/`(설치, 재실행, 실패, 오프라인, 충돌)에 있고 `uv run python devtools/make_examples.py`로 다시 만든다(네트워크 사용 없음).
+
 `Codex load: UNVERIFIED`는 정상이다. Codex가 Skill을 실제로 읽었는지는 Codex 안에서 `/skills`로만 확인할 수 있다.
 
 ## 안전 장치
@@ -81,7 +105,7 @@ Next action:
 
 ## 셸 전용 모드의 한계
 
-Python 3.9+가 없으면 `bootstrap.sh`/`bootstrap.ps1`이 `AGENTS.md`와 Skill만 복사한다(종료 코드 1, `Status: PARTIAL`). 제한 사항:
+Python 3.9+가 없으면 `bootstrap.sh`/`bootstrap.ps1`이 `AGENTS.md`와 Skill만 복사한다(종료 코드 1, `Status: PARTIAL`). 어떤 프로필을 골라도 마찬가지이며 도구 설치와 MCP는 없다. 제한 사항:
 
 - `--verify-only`는 거부한다(종료 코드 64, 아무것도 쓰지 않음). 검증은 Python이 필요하다.
 - `--offline`, `--no-mcp`, `--verbose`는 아무 효과가 없다.
@@ -92,18 +116,30 @@ Python 3.9+가 없으면 `bootstrap.sh`/`bootstrap.ps1`이 `AGENTS.md`와 Skill�
 
 키트 폴더의 `AGENTS.md` 내용과 `.agents/` 폴더를 작업 공간 루트에 그대로 복사하면 된다. 그다음 Codex에서 `/skills`로 확인한다.
 
+## 문서
+
+- `docs/ARCHITECTURE.md`: 구조와 실행 흐름
+- `docs/SECURITY.md`: 보안 장치와 한계, 네트워크 동작
+- `docs/COMPATIBILITY.md`: 지원 환경
+- `docs/RULES_CHECKLIST.md`: 사전 체험 체크리스트와 규칙
+- `docs/TROUBLESHOOTING.md`: 메시지별 대응
+- `docs/ASSUMPTIONS.md`, `docs/TEST_REPORT.md`: 가정과 테스트 결과
+- `docs/examples/`: 실제 실행 로그 예시
+
 ## 개발
 
 ```bash
 uv sync
 uv run pytest -q
 uv run ruff check . && uv run ruff format --check .
+uv run python devtools/make_examples.py   # docs/examples/*.log 재생성
 shellcheck bootstrap.sh
 ```
 
 ## 공개 전 점검
 
 - [ ] `LICENSE`(MIT) 저자·연도 확인
-- [ ] README의 `<USER>/<REPO>`를 실제 주소로 교체
+- [x] README의 저장소 주소를 실제 주소로 교체
+- [ ] 시험 전에 PR을 `main`에 병합 (한 줄 설치는 `main`을 받는다)
 - [ ] 저장소에 토큰·개인 경로·시험 관련 비공개 자료가 없는지 확인
 - [ ] `docs/TEST_REPORT.md`가 최신인지 확인

@@ -5,6 +5,7 @@ from __future__ import annotations
 from pathlib import Path
 
 from .agentsmd import MarkerError, extract_block
+from .mcpconfig import verify_config
 from .model import CONFLICT, FAIL, PASS, ItemResult, Outcome
 from .plan import FileChange, iter_skill_files
 from .profiles import Profile
@@ -18,6 +19,7 @@ def verify_target(
     changes: list[FileChange],
     check_writable: bool,
     writable: bool,
+    include_mcp: bool = False,
 ) -> list[ItemResult]:
     conflicts: dict[str, str] = {}
     for change in changes:
@@ -41,6 +43,8 @@ def verify_target(
         items.append(
             _verify_skill(target, kit_root, name, name in profile.required_skills, conflicts)
         )
+    if include_mcp and profile.mcp:
+        items.append(verify_config(target, kit_root, profile.mcp, conflicts.get("mcp-config")))
     return items
 
 

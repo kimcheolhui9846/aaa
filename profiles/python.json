@@ -1,0 +1,10 @@
+{
+  "name": "python",
+  "description": "core plus pytest and ruff (installed only when missing) and the sequential-thinking MCP server.",
+  "extends": "core",
+  "tools": [
+    {"name": "pytest", "kind": "python-tool", "package": "pytest", "version": "8.4.2", "command": "pytest"},
+    {"name": "ruff", "kind": "python-tool", "package": "ruff", "version": "0.17.3", "command": "ruff"}
+  ],
+  "mcp": ["sequential-thinking"]
+}

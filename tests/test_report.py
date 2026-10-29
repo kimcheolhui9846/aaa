@@ -70,3 +70,14 @@ def test_render_contains_report_fields(tmp_path):
     assert "  FAIL       optional skill:y  (not installed)" in text
     assert "Status:       PARTIAL" in text
     assert text.rstrip().endswith("  - do this")
+
+
+def test_next_actions_required_first_and_trust(tmp_path):
+    items = [
+        item("skill:opt", False, FAIL, "x"),
+        item("skill:req", True, FAIL, "y"),
+    ]
+    actions = next_actions(items, tmp_path, "BLOCKED")
+    assert actions[0].startswith("Fix skill:req")
+    ready = next_actions([item("codex-mcp:s", False, UNVERIFIED, "z")], tmp_path, "READY")
+    assert ready[1].startswith(f"Trust {tmp_path} in Codex")

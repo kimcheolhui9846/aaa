@@ -1,0 +1,9 @@
+{
+  "name": "full",
+  "description": "Development only. Checks every candidate (python, data, web, MCP) and reports what it would install; installs no tools.",
+  "extends": "data",
+  "report_only": true,
+  "tools": [
+    {"name": "node-project", "kind": "node-project"}
+  ]
+}

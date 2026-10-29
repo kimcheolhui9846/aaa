@@ -1,0 +1,24 @@
+$ bootstrap --verbose
+Environment:  Windows 11 AMD64, shell=windows, python 3.12.10
+Tools:        git OK, uv OK, node OK, npx OK, codex OK, python OK
+Target:       <target>
+Profile:      core
+AGENTS.md:    INSTALLED
+Skills:       6 expected / 6 verified
+Codex load:   UNVERIFIED (open Codex and run /skills)
+MCP:          none in profile 'core'
+Network:      not used
+Items:
+  PASS       required target writable
+  PASS       required AGENTS.md
+  PASS       required skill:task-router
+  PASS       required skill:tdd-automator
+  PASS       required skill:algorithm-optimizer
+  PASS       required skill:submission-validator
+  PASS       optional skill:implementation-review
+  PASS       optional skill:benchmark
+  PASS       required security audit  (no .codex/config.toml)
+Status:       READY
+Next action:
+  - Open Codex in <target> and run /skills to confirm the kit skills load.
+(exit 0)
