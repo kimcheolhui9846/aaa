@@ -13,7 +13,7 @@
 | PSScriptAnalyzer | 미실행 | `PSScriptAnalyzer not installed - not run` |
 | one-liner (PowerShell, clean clone) | PASS | `git clone --depth 1 --branch feat/bootstrap-kit file:///D:/aaa/aaa kit` 후 `bootstrap.ps1 --target .` 첫 실행과 재실행 모두 `Status:       READY`, `exit=0` |
 | one-liner (Git Bash) | PASS | `C:\Program Files\Git\bin\bash.exe`로 `bash kit/bootstrap.sh --target .` 실행, 기존 설치 상태와 빈 디렉터리 두 대상 모두 `Status:       READY`, exit 0 |
-| Codex `/skills` | UNVERIFIED | 사용자 확인 대기 (Codex TUI에서 /skills) |
+| Codex 스킬·AGENTS.md 로드 | PASS | 2026-10-29, codex-cli 0.165.0 + FactChat 프로필. `codex debug prompt-input`에 키트 정책과 암묵 스킬 4개가 들어감(명시 전용 2개는 설계대로 목록에 없음). TUI에서 `$task-router`로 요청 → 작업 공간에 `TASK_BRIEF.md` 생성 확인 |
 
 ## 건너뛴 테스트와 이유
 - `tests/test_fsops.py:31` 심볼릭 링크 탈출 테스트: `symlinks not permitted on this system` (Windows에서 심볼릭 링크 권한 없음)
@@ -48,4 +48,5 @@
 ## 미검증 (계획 2)
 
 - 실제 `npx`로 한 MCP 핸드셰이크(위 표). 테스트는 로컬 가짜 서버만 쓴다.
+- Codex에서의 MCP 표시: 신뢰하지 않은 작업 공간에서는 `codex mcp list`에 `sequential-thinking`이 나타나지 않는다(Codex가 신뢰된 프로젝트의 `.codex/config.toml`만 읽음). `-c projects.'<경로>'.trust_level="trusted"` 같은 일회성 설정으로는 신뢰가 바뀌지 않았다. 스킬과 AGENTS.md는 신뢰와 무관하게 읽혔다.
 - 기존 건너뜀 1건은 Windows 심볼릭 링크 권한 때문이다(계획 1과 동일).
