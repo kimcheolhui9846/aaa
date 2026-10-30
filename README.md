@@ -123,7 +123,7 @@ Tools:        git OK, uv OK, node OK, npx OK, codex OK, python OK
 Target:       D:\work\task
 Profile:      core
 AGENTS.md:    INSTALLED
-Skills:       6 expected / 6 verified
+Skills:       8 expected / 8 verified
 Codex load:   UNVERIFIED (open Codex and run /skills)
 MCP:          none in profile 'core'
 Network:      not used

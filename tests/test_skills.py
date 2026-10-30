@@ -1,3 +1,5 @@
+import re
+
 import pytest
 
 from kit.skills import MAX_DESCRIPTION, parse_frontmatter, validate_skill
@@ -143,7 +145,7 @@ def test_extra_skill_is_implicit(kit_root, name):
 
 def test_debugging_skill_credits_source(kit_root):
     text = (kit_root / ".agents/skills/systematic-debugging/SKILL.md").read_text(encoding="utf-8")
-    assert "Adapted from obra/superpowers (MIT)" in text
+    assert "Adapted from obra/superpowers (MIT, Copyright (c) 2025 Jesse Vincent)" in text
 
 
 def test_third_party_notices(kit_root):
@@ -156,7 +158,13 @@ def test_third_party_notices(kit_root):
 
 def test_task_router_routes_new_skills(kit_root):
     text = (kit_root / ".agents/skills/task-router/SKILL.md").read_text(encoding="utf-8")
-    for needle in ("`codebase-explorer`", "`systematic-debugging`", "## Plan", "## Decision log"):
+    for needle in (
+        "`codebase-explorer`",
+        "`systematic-debugging`",
+        "## Plan",
+        "## Decision log",
+        "## Repository",
+    ):
         assert needle in text
 
 
@@ -164,3 +172,11 @@ def test_submission_validator_has_not_run(kit_root):
     text = (kit_root / ".agents/skills/submission-validator/SKILL.md").read_text(encoding="utf-8")
     assert "NOT RUN" in text
     assert "this validation pass" in text
+
+
+@pytest.mark.parametrize("name", ALL)
+def test_relative_links_resolve(kit_root, name):
+    folder = kit_root / ".agents" / "skills" / name
+    text = (folder / "SKILL.md").read_text(encoding="utf-8")
+    for link in re.findall(r"`(\.\./[^`]+)`", text):
+        assert (folder / link).is_file(), f"{name}: {link}"

@@ -57,6 +57,11 @@ Type: <algorithm|data|web-api|output-format|debugging|other>
 ## Risks
 - <edge cases, ambiguities, performance traps>
 
+## Repository (existing-repo tasks only; filled by codebase-explorer)
+- Baseline: <test command> -> <N passed, M failed; names of already failing tests>
+- Change: <files>
+- Leave: <files>
+
 ## Skills
 - <skill>: <why it is needed>
 

@@ -61,5 +61,5 @@
 | `uv run pytest -q` | PASS | `312 passed, 1 skipped in 37.05s` |
 | `uv run ruff check .` | PASS | `All checks passed!` |
 | `uv run ruff format --check .` | PASS | `50 files already formatted` |
-| `uv run python devtools/make_examples.py` | PASS | `docs/examples/*.log` 5개 재생성. 변경은 `Skills: 8 expected / 8 verified`와 선택 스킬 두 줄뿐 |
+| `uv run python devtools/make_examples.py` | PASS | `docs/examples/*.log` 5개 재생성. 변경은 `Skills: N expected / M verified` 줄(`install`·`rerun`·`failure`·`offline`은 8/8, `conflict.log`는 8/7)과 `rerun.log`에 추가된 PASS 두 줄(`optional skill:systematic-debugging`, `optional skill:codebase-explorer`)뿐 |
 | `run_kit.py --profile core` 빈 폴더 설치 | PASS | `Status:       READY`, `exit=0`, `Skills:       8 expected / 8 verified`, `.agents/skills`에 8개 폴더, `THIRD_PARTY_NOTICES.md`는 대상에 없음 |
