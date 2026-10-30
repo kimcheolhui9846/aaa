@@ -6,18 +6,18 @@
 
 ## 한 줄 설치
 
-저장소 주소는 `https://github.com/kimcheolhui9846/aaa`다. 설치는 기본 브랜치 `main`에서 받으므로, 시험 전에 작업 브랜치를 `main`에 병합해 둔다. 복제와 실행은 분리돼 있다(`curl | bash` 방식 아님). 키트는 작업 공간 **밖**(형제 폴더 `../aaa`)에 복제한다. 그래야 키트 폴더가 제출물에 섞이지 않는다. 아래 명령은 작업 공간 안에서 실행한다.
+저장소 주소는 `https://github.com/kimcheolhui9846/skill_kit_kch`다. 설치는 기본 브랜치 `main`에서 받으므로, 시험 전에 작업 브랜치를 `main`에 병합해 둔다. 복제와 실행은 분리돼 있다(`curl | bash` 방식 아님). 키트는 작업 공간 **밖**(형제 폴더 `../skill_kit_kch`)에 복제한다. 그래야 키트 폴더가 제출물에 섞이지 않는다. 아래 명령은 작업 공간 안에서 실행한다.
 
 bash (Linux/macOS/Git Bash):
 
 ```bash
-git clone --depth 1 https://github.com/kimcheolhui9846/aaa.git ../aaa && bash ../aaa/bootstrap.sh --target .
+git clone --depth 1 https://github.com/kimcheolhui9846/skill_kit_kch.git ../skill_kit_kch && bash ../skill_kit_kch/bootstrap.sh --target .
 ```
 
 Windows PowerShell:
 
 ```powershell
-git clone --depth 1 https://github.com/kimcheolhui9846/aaa.git ..\aaa; if ($LASTEXITCODE -eq 0) { & ..\aaa\bootstrap.ps1 --target . }
+git clone --depth 1 https://github.com/kimcheolhui9846/skill_kit_kch.git ..\skill_kit_kch; if ($LASTEXITCODE -eq 0) { & ..\skill_kit_kch\bootstrap.ps1 --target . }
 ```
 
 실행 정책 때문에 `.ps1`이 막히면 스크립트를 우회하지 말고 아래 "스크립트를 실행할 수 없을 때"를 따른다.
@@ -28,14 +28,14 @@ git clone --depth 1 https://github.com/kimcheolhui9846/aaa.git ..\aaa; if ($LAST
 
 ### 방법 1. 공개 저장소에서 받아 설치 (어느 PC든)
 
-작업 폴더 안에서 실행한다. 키트는 형제 폴더 `..\aaa`에 받는다.
+작업 폴더 안에서 실행한다. 키트는 형제 폴더 `..\skill_kit_kch`에 받는다.
 
 ```powershell
-git clone --depth 1 https://github.com/kimcheolhui9846/aaa ..\aaa; ..\aaa\bootstrap.ps1
+git clone --depth 1 https://github.com/kimcheolhui9846/skill_kit_kch ..\skill_kit_kch; ..\skill_kit_kch\bootstrap.ps1
 ```
 
 ```bash
-git clone --depth 1 https://github.com/kimcheolhui9846/aaa ../aaa && bash ../aaa/bootstrap.sh
+git clone --depth 1 https://github.com/kimcheolhui9846/skill_kit_kch ../skill_kit_kch && bash ../skill_kit_kch/bootstrap.sh
 ```
 
 `--target`을 빼면 현재 폴더에 설치한다. 프로필은 끝에 `--profile python`처럼 붙인다. 이 방법은 당일 GitHub에 접속할 수 있어야 한다.
@@ -49,7 +49,7 @@ git clone --depth 1 https://github.com/kimcheolhui9846/aaa ../aaa && bash ../aaa
 1. git, Python 3.9 이상, Codex를 설치한다. MCP를 쓰려면 Node.js도 설치한다.
 2. 키트를 고정 위치에 받는다.
    ```powershell
-   git clone https://github.com/kimcheolhui9846/aaa C:\kit
+   git clone https://github.com/kimcheolhui9846/skill_kit_kch C:\kit
    ```
 3. 스크립트 실행을 현재 사용자에게만 허용한다(관리자 권한 불필요).
    ```powershell
