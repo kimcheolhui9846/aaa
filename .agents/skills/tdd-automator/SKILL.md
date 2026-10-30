@@ -1,6 +1,6 @@
 ---
 name: tdd-automator
-description: "Use when implementing or fixing core logic whose results can be checked - writes failing tests first from the task's examples and relevant boundaries, then implements until they pass. Do NOT use for pure formatting, config, docs, or trivial one-line edits."
+description: "Use when implementing or fixing checkable core logic - writes failing tests from the task's examples and relevant boundaries first, then implements until they pass. Do NOT use for formatting, config, docs, or trivial one-line edits."
 ---
 
 # TDD Automator

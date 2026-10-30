@@ -1,3 +1,5 @@
+import re
+
 import pytest
 
 from kit.skills import MAX_DESCRIPTION, parse_frontmatter, validate_skill
@@ -86,7 +88,8 @@ def test_agents_md_policy(kit_root):
     assert "hackathon-kit:begin" not in text
 
 
-ALL = CORE + ["implementation-review", "benchmark"]
+EXTRA = ["systematic-debugging", "codebase-explorer"]
+ALL = CORE + ["implementation-review", "benchmark"] + EXTRA
 EXPLICIT_ONLY = ["implementation-review", "benchmark"]
 
 
@@ -120,3 +123,60 @@ def test_explicit_only_policy(kit_root, name):
 
 def test_benchmark_language_reference(kit_root):
     assert (kit_root / ".agents/skills/benchmark/references/languages.md").is_file()
+
+
+@pytest.mark.parametrize("name", EXTRA)
+def test_extra_skill_has_example(kit_root, name):
+    assert list((kit_root / ".agents" / "skills" / name / "examples").glob("*.md"))
+
+
+@pytest.mark.parametrize("name", EXTRA)
+def test_extra_skill_description_is_one_quoted_line(kit_root, name):
+    text = (kit_root / ".agents" / "skills" / name / "SKILL.md").read_text(encoding="utf-8")
+    line = next(ln for ln in text.splitlines() if ln.startswith("description:"))
+    assert line.startswith('description: "') and line.endswith('"')
+    assert line.count('"') == 2
+
+
+@pytest.mark.parametrize("name", EXTRA)
+def test_extra_skill_is_implicit(kit_root, name):
+    assert not (kit_root / ".agents" / "skills" / name / "agents" / "openai.yaml").exists()
+
+
+def test_debugging_skill_credits_source(kit_root):
+    text = (kit_root / ".agents/skills/systematic-debugging/SKILL.md").read_text(encoding="utf-8")
+    assert "Adapted from obra/superpowers (MIT, Copyright (c) 2025 Jesse Vincent)" in text
+
+
+def test_third_party_notices(kit_root):
+    text = (kit_root / "THIRD_PARTY_NOTICES.md").read_text(encoding="utf-8")
+    assert "https://github.com/obra/superpowers" in text
+    assert "2ce8aa15d05bd57213e6f746f953aafb7ded7a8b" in text
+    assert "MIT License" in text
+    assert "Copyright (c) 2025 Jesse Vincent" in text
+
+
+def test_task_router_routes_new_skills(kit_root):
+    text = (kit_root / ".agents/skills/task-router/SKILL.md").read_text(encoding="utf-8")
+    for needle in (
+        "`codebase-explorer`",
+        "`systematic-debugging`",
+        "## Plan",
+        "## Decision log",
+        "## Repository",
+    ):
+        assert needle in text
+
+
+def test_submission_validator_has_not_run(kit_root):
+    text = (kit_root / ".agents/skills/submission-validator/SKILL.md").read_text(encoding="utf-8")
+    assert "NOT RUN" in text
+    assert "this validation pass" in text
+
+
+@pytest.mark.parametrize("name", ALL)
+def test_relative_links_resolve(kit_root, name):
+    folder = kit_root / ".agents" / "skills" / name
+    text = (folder / "SKILL.md").read_text(encoding="utf-8")
+    for link in re.findall(r"`(\.\./[^`]+)`", text):
+        assert (folder / link).is_file(), f"{name}: {link}"

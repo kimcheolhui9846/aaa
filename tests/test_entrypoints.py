@@ -7,6 +7,7 @@ from pathlib import Path
 import pytest
 
 from kit.agentsmd import BEGIN
+from kit.profiles import load_profile
 
 KIT_ROOT = Path(__file__).resolve().parent.parent
 NO_PYTHON = "kit-no-such-python"
@@ -98,7 +99,8 @@ def test_fallback_installs_then_skips(kind, workspace):
     assert first.returncode == 1, first.stdout + first.stderr
     assert "shell-only" in first.stdout and "Status:       PARTIAL" in first.stdout
     assert (workspace / "AGENTS.md").read_text(encoding="utf-8").startswith(BEGIN)
-    assert len(list((workspace / ".agents" / "skills").iterdir())) == 6
+    expected = len(load_profile(KIT_ROOT, "core").skills)
+    assert len(list((workspace / ".agents" / "skills").iterdir())) == expected
     second = _run(kind, cwd=workspace, python=NO_PYTHON)
     assert second.returncode == 1
     assert "SKIP" in second.stdout and "CONFLICT" not in second.stdout

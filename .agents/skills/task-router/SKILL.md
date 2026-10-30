@@ -1,6 +1,6 @@
 ---
 name: task-router
-description: "Use when starting a new non-trivial coding task or when requirements are unclear - extracts goal, I/O format, constraints and evaluation into TASK_BRIEF.md and picks the minimum set of other skills. Do NOT use for one-line fixes, follow-up edits on an already-briefed task, or questions that need no code."
+description: "Use when starting a new non-trivial coding task or when requirements are unclear - writes goal, I/O, constraints and evaluation to TASK_BRIEF.md and picks the fewest other skills. Do NOT use for one-line fixes, follow-ups on a briefed task, or questions needing no code."
 ---
 
 # Task Router
@@ -23,12 +23,14 @@ Turn the task statement into a short written brief, then choose the fewest skill
    |---|---|
    | Core logic with checkable inputs and outputs | `tdd-automator` |
    | Input sizes or time/memory limits are stated, or a naive approach would be too slow | `algorithm-optimizer` |
+   | The task gives an existing repository to modify or extend | `codebase-explorer`, before any edit |
+   | A test fails or the program misbehaves and the cause is unknown | `systematic-debugging` |
    | There is a deliverable (files, output format, run command) | `submission-validator`, before finishing |
    | The user wants the design explained | `implementation-review` (explicit `$implementation-review` only) |
    | Measured slowness needs profiling | `benchmark` (explicit `$benchmark` only) |
 
-6. Write `TASK_BRIEF.md` in the workspace root with the template below. Keep it under 40 lines.
-7. Re-read `TASK_BRIEF.md` when the conversation gets long and before declaring the task done.
+6. Write `TASK_BRIEF.md` in the workspace root with the template below. Keep it under 40 lines, not counting the Decision log.
+7. Re-read `TASK_BRIEF.md` when the conversation gets long and before declaring the task done. Append one Decision log line for each non-obvious decision.
 
 ## TASK_BRIEF.md template
 
@@ -55,8 +57,21 @@ Type: <algorithm|data|web-api|output-format|debugging|other>
 ## Risks
 - <edge cases, ambiguities, performance traps>
 
+## Repository (existing-repo tasks only; filled by codebase-explorer)
+- Baseline: <test command> -> <N passed, M failed; names of already failing tests>
+- Change: <files>
+- Leave: <files>
+
 ## Skills
 - <skill>: <why it is needed>
+
+## Plan
+1. <first step>
+2. <next step>
+<3 to 5 steps in order>
+
+## Decision log
+- <what> -> <why> -> <evidence>
 ```
 
 ## Rules

@@ -1,12 +1,14 @@
 from kit.agentsmd import BEGIN
+from kit.profiles import load_profile
 
 
-def test_first_run_is_ready(run_kit, workspace):
+def test_first_run_is_ready(run_kit, workspace, kit_root):
     code, out = run_kit()
     assert code == 0, out
     assert "Status:       READY" in out
     assert (workspace / "AGENTS.md").read_text(encoding="utf-8").startswith(BEGIN)
-    assert len(list((workspace / ".agents" / "skills").iterdir())) == 6
+    expected = len(load_profile(kit_root, "core").skills)
+    assert len(list((workspace / ".agents" / "skills").iterdir())) == expected
 
 
 def test_existing_agents_md_is_preserved_and_backed_up(run_kit, workspace):
