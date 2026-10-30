@@ -33,7 +33,7 @@ def test_fresh_install_verifies(kit_root, workspace):
     profile = _install(kit_root, workspace)
     items = verify_target(workspace, kit_root, profile, [], check_writable=True, writable=True)
     assert [i.name for i in items][:2] == ["target writable", "AGENTS.md"]
-    assert len(items) == 8
+    assert len(items) == 2 + len(profile.skills)
     assert all(i.verified == PASS for i in items)
     assert {i.name for i in items if i.required} == REQUIRED
 

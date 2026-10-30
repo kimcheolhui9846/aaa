@@ -12,6 +12,7 @@ ALL_SKILLS = [
     "submission-validator",
     "implementation-review",
     "benchmark",
+    "systematic-debugging",
 ]
 
 PYTEST = {
