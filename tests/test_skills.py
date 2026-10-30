@@ -86,7 +86,7 @@ def test_agents_md_policy(kit_root):
     assert "hackathon-kit:begin" not in text
 
 
-EXTRA = ["systematic-debugging"]
+EXTRA = ["systematic-debugging", "codebase-explorer"]
 ALL = CORE + ["implementation-review", "benchmark"] + EXTRA
 EXPLICIT_ONLY = ["implementation-review", "benchmark"]
 

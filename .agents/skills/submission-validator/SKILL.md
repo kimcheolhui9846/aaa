@@ -1,6 +1,6 @@
 ---
 name: submission-validator
-description: "Use right before finishing or submitting - checks the result against every requirement in TASK_BRIEF.md or the task statement, output file names and formats, leftover debug output, and runs tests and linters, giving evidence for each item. Do NOT use mid-implementation or for tasks with no deliverable."
+description: "Use right before finishing - checks the result against every requirement in TASK_BRIEF.md or the statement, file names and formats, leftover debug output, and runs tests and linters with evidence. Do NOT use mid-implementation or when there is no deliverable."
 ---
 
 # Submission Validator

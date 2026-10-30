@@ -1,6 +1,6 @@
 ---
 name: implementation-review
-description: "Use only when explicitly invoked as $implementation-review - summarizes why the current solution works: key branches, data structure choices, correctness argument, complexity and limits, for the implementer's own understanding. Do NOT use automatically, and never during the written-answer phase."
+description: "Use only when explicitly invoked as $implementation-review - explains why the current solution works: key branches, data structures, correctness, complexity and limits. Do NOT use automatically, and never during the written-answer phase."
 ---
 
 # Implementation Review

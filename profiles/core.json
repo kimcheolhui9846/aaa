@@ -1,6 +1,6 @@
 {
   "name": "core",
-  "description": "AGENTS.md and the six kit skills. Installs no tools and no MCP servers.",
+  "description": "AGENTS.md and the eight kit skills. Installs no tools and no MCP servers.",
   "extends": null,
   "skills": [
     "task-router",
@@ -9,7 +9,8 @@
     "submission-validator",
     "implementation-review",
     "benchmark",
-    "systematic-debugging"
+    "systematic-debugging",
+    "codebase-explorer"
   ],
   "required_skills": [
     "task-router",

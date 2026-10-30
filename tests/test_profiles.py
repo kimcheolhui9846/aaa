@@ -13,6 +13,7 @@ ALL_SKILLS = [
     "implementation-review",
     "benchmark",
     "systematic-debugging",
+    "codebase-explorer",
 ]
 
 PYTEST = {

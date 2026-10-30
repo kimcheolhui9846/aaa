@@ -1,6 +1,6 @@
 ---
 name: task-router
-description: "Use when starting a new non-trivial coding task or when requirements are unclear - extracts goal, I/O format, constraints and evaluation into TASK_BRIEF.md and picks the minimum set of other skills. Do NOT use for one-line fixes, follow-up edits on an already-briefed task, or questions that need no code."
+description: "Use when starting a new non-trivial coding task or when requirements are unclear - writes goal, I/O, constraints and evaluation to TASK_BRIEF.md and picks the fewest other skills. Do NOT use for one-line fixes, follow-ups on a briefed task, or questions needing no code."
 ---
 
 # Task Router
