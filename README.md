@@ -2,7 +2,7 @@
 
 > **Claude Code 사전 개발 전용 / 시험 중 사용 불가.** 이 저장소는 시험 전에 Claude Code로 개발했다. 시험 중에는 운영 환경이 제공하는 Codex만 사용하며, 이 키트는 Codex가 읽을 `AGENTS.md`와 Skill 파일을 작업 공간에 배치할 뿐 외부 모델이나 네트워크를 호출하지 않는다.
 
-대상 작업 공간에 Codex용 정책 파일(`AGENTS.md`)과 Skill 6개(`.agents/skills/`)를 안전하게 설치하고, 설치 결과를 READY / PARTIAL / BLOCKED로 보고한다.
+대상 작업 공간에 Codex용 정책 파일(`AGENTS.md`)과 Skill 8개(`.agents/skills/`)를 안전하게 설치하고, 설치 결과를 READY / PARTIAL / BLOCKED로 보고한다.
 
 ## 한 줄 설치
 
@@ -74,7 +74,7 @@ git clone --depth 1 https://github.com/kimcheolhui9846/aaa ../aaa && bash ../aaa
 
 | 프로필 | 내용 |
 |---|---|
-| `core` | AGENTS.md and the six kit skills. Installs no tools and no MCP servers. (기본값) |
+| `core` | AGENTS.md and the eight kit skills. Installs no tools and no MCP servers. (기본값) |
 | `python` | core plus pytest and ruff (installed only when missing) and the sequential-thinking MCP server. |
 | `data` | python plus a check for numpy and pandas. Never installs them; prints the install command instead. |
 | `web` | core plus a read-only check of the target's package.json, lockfile and engines.node, and the sequential-thinking MCP server. Installs nothing. |

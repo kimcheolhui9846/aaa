@@ -4,7 +4,7 @@ Tools:        git OK, uv OK, node OK, npx OK, codex OK, python OK
 Target:       <target>
 Profile:      core
 AGENTS.md:    INSTALLED
-Skills:       6 expected / 6 verified
+Skills:       8 expected / 8 verified
 Codex load:   UNVERIFIED (open Codex and run /skills)
 MCP:          none in profile 'core'
 Network:      not used
@@ -17,6 +17,8 @@ Items:
   PASS       required skill:submission-validator
   PASS       optional skill:implementation-review
   PASS       optional skill:benchmark
+  PASS       optional skill:systematic-debugging
+  PASS       optional skill:codebase-explorer
   PASS       required security audit  (no .codex/config.toml)
 Status:       READY
 Next action:

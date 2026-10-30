@@ -20,7 +20,7 @@
 
 ## 미검증
 - 시험 환경(Cofa) 전체: docs/ASSUMPTIONS.md 참고
-- Codex가 Skill 6개를 실제로 로드하는지, `implementation-review`와 `benchmark`가 명시 호출 전용으로 표시되는지: 사용자의 대화형 확인 필요
+- Codex가 Skill 8개를 실제로 로드하는지(`/skills`에 `systematic-debugging`, `codebase-explorer` 포함), `implementation-review`와 `benchmark`가 명시 호출 전용으로 표시되는지: 사용자의 대화형 확인 필요
 - PSScriptAnalyzer가 설치되지 않아 `bootstrap.ps1` 정적 분석은 실행하지 못했다
 
 # 계획 2 (프로필, MCP, 감사)
@@ -51,3 +51,15 @@
 - 실제 `npx`로 한 MCP 핸드셰이크(위 표). 테스트는 로컬 가짜 서버만 쓴다.
 - Codex에서의 MCP 표시: 신뢰하지 않은 작업 공간에서는 `codex mcp list`에 `sequential-thinking`이 나타나지 않는다(Codex가 신뢰된 프로젝트의 `.codex/config.toml`만 읽음). `-c projects.'<경로>'.trust_level="trusted"` 같은 일회성 설정으로는 신뢰가 바뀌지 않았다. 스킬과 AGENTS.md는 신뢰와 무관하게 읽혔다.
 - 기존 건너뜀 1건은 Windows 심볼릭 링크 권한 때문이다(계획 1과 동일).
+
+# 추가 Skill 2개 (systematic-debugging, codebase-explorer)
+
+실행일: 2026-10-30, 환경: Windows 11 AMD64, Python 3.12.10
+
+| 명령 | 결과 | 근거 |
+|---|---|---|
+| `uv run pytest -q` | PASS | `312 passed, 1 skipped in 37.05s` |
+| `uv run ruff check .` | PASS | `All checks passed!` |
+| `uv run ruff format --check .` | PASS | `50 files already formatted` |
+| `uv run python devtools/make_examples.py` | PASS | `docs/examples/*.log` 5개 재생성. 변경은 `Skills: 8 expected / 8 verified`와 선택 스킬 두 줄뿐 |
+| `run_kit.py --profile core` 빈 폴더 설치 | PASS | `Status:       READY`, `exit=0`, `Skills:       8 expected / 8 verified`, `.agents/skills`에 8개 폴더, `THIRD_PARTY_NOTICES.md`는 대상에 없음 |
