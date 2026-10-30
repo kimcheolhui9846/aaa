@@ -152,3 +152,15 @@ def test_third_party_notices(kit_root):
     assert "2ce8aa15d05bd57213e6f746f953aafb7ded7a8b" in text
     assert "MIT License" in text
     assert "Copyright (c) 2025 Jesse Vincent" in text
+
+
+def test_task_router_routes_new_skills(kit_root):
+    text = (kit_root / ".agents/skills/task-router/SKILL.md").read_text(encoding="utf-8")
+    for needle in ("`codebase-explorer`", "`systematic-debugging`", "## Plan", "## Decision log"):
+        assert needle in text
+
+
+def test_submission_validator_has_not_run(kit_root):
+    text = (kit_root / ".agents/skills/submission-validator/SKILL.md").read_text(encoding="utf-8")
+    assert "NOT RUN" in text
+    assert "this validation pass" in text

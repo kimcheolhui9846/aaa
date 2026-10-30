@@ -9,4 +9,5 @@ Mock task: "Write `solution.py` that reads `input.txt` and writes `output.txt` w
 | Matches the statement example | `python solution.py` on the example, then `diff output.txt expected.txt` | no diff | PASS |
 | No debug prints | `grep -n "print(" solution.py` | 1 hit, line 40 writes the result | PASS |
 | Tests pass | `python -m pytest -q` | `6 passed` | PASS |
+| Linter passes | `ruff check .` | `ruff: command not found` | NOT RUN |
 | Submitted through the exam page | human step | - | MANUAL |
