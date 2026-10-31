@@ -20,7 +20,7 @@
 
 ## 미검증
 - 시험 환경(Cofa) 전체: docs/ASSUMPTIONS.md 참고
-- Codex가 Skill 8개를 실제로 로드하는지(`/skills`에 `systematic-debugging`, `codebase-explorer` 포함), `implementation-review`와 `benchmark`가 명시 호출 전용으로 표시되는지: 사용자의 대화형 확인 필요
+- 요청 시 전용 Skill 3개(`implementation-review`, `benchmark`, `design-review`)가 키워드나 `$이름`에만 반응하고 평소에는 끼어들지 않는지: 사용자의 대화형 확인 필요
 - PSScriptAnalyzer가 설치되지 않아 `bootstrap.ps1` 정적 분석은 실행하지 못했다
 
 # 계획 2 (프로필, MCP, 감사)
@@ -63,3 +63,18 @@
 | `uv run ruff format --check .` | PASS | `50 files already formatted` |
 | `uv run python devtools/make_examples.py` | PASS | `docs/examples/*.log` 5개 재생성. 변경은 `Skills: N expected / M verified` 줄(`install`·`rerun`·`failure`·`offline`은 8/8, `conflict.log`는 8/7)과 `rerun.log`에 추가된 PASS 두 줄(`optional skill:systematic-debugging`, `optional skill:codebase-explorer`)뿐 |
 | `run_kit.py --profile core` 빈 폴더 설치 | PASS | `Status:       READY`, `exit=0`, `Skills:       8 expected / 8 verified`, `.agents/skills`에 8개 폴더, `THIRD_PARTY_NOTICES.md`는 대상에 없음 |
+
+# 추가 Skill 3개 (counterexample-hunter, algorithm-options, design-review)와 요청 시 호출
+
+실행일: 2026-10-31, 환경: Windows 11 AMD64, Python 3.12.10
+
+| 명령 | 결과 | 근거 |
+|---|---|---|
+| `uv run pytest -q` | PASS | `337 passed, 1 skipped` |
+| `uv run ruff check .` | PASS | `All checks passed!` |
+| `uv run ruff format --check .` | PASS | `50 files already formatted` |
+| `uv run python devtools/make_examples.py` | PASS | `docs/examples/*.log` 5개 재생성. 변경은 `Skills: N expected / M verified` 줄과 `rerun.log`에 추가된 PASS 세 줄(`optional skill:counterexample-hunter`, `optional skill:algorithm-options`, `optional skill:design-review`)뿐 |
+| `run_kit.py --profile core` 빈 폴더 설치 | PASS | `Status:       READY`, `exit=0`, `Skills:       11 expected / 11 verified`, `.agents/skills`에 11개 폴더 |
+| `codex debug prompt-input` (codex-cli 0.166.0, 설치한 빈 폴더) | PASS | `<skills_instructions>` 목록에 키트 Skill 11개가 모두 들어감. 명시 전용이던 `implementation-review`, `benchmark`도 이제 목록에 있음 |
+
+description 합계 상한을 2000자에서 3000자로 올렸다(`test_total_description_budget`). 현재 합계는 2791자다.
